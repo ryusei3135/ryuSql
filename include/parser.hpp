@@ -17,6 +17,8 @@
 
 enum class NodeKind {
     Table,
+    TableName,
+    Column,
     ColumnName,
     ColumnType,
     SelectColumn,
@@ -25,24 +27,24 @@ enum class NodeKind {
 
 struct AstNode {
     NodeKind kind;
-    size_t value;
+    std::optional<size_t> value;
     std::vector<size_t> children;
 };
 
 using Ast = std::vector<AstNode>;
 
 
-struct AstPush {
+struct [[nodiscard]] AstPush {
     Ast ast;
 
-    template<typename R>
-    R push_ast(
-        size_t index,
+    template<typename RetValue>
+    RetValue push_ast(
+        std::optional<size_t> index,
         NodeKind kind
     ) {
         size_t id = ast.size();
 
-        this->ast.push_back(
+        ast.push_back(
             AstNode{
                 .kind = kind,
                 .value = index,
@@ -50,7 +52,7 @@ struct AstPush {
             }
         );
 
-        if constexpr (!std::is_same_v<R, void>) {
+        if constexpr (!std::is_same_v<RetValue, void>) {
             return id;
         }
     }

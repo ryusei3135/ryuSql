@@ -27,26 +27,31 @@ struct CreateTable : AstPush {
     std::optional<size_t> table_name_index;
 
     CreateTable() {
-        this->expr_flags = flag::ExprFlags::NextCreate;
-        this->column_flags = flag::ColumnFlags::NextName;
-        this->table_name_index = std::nullopt;
+        expr_flags = flag::ExprFlags::NextCreate;
+        column_flags = flag::ColumnFlags::NextName;
+        table_name_index = std::nullopt;
+
+        push_ast<void>(
+            std::nullopt,
+            NodeKind::Table
+        );
     }
 
     inline std::optional<Errors> string_token(size_t i) {
-        if (this->expr_flags == flag::ExprFlags::NextColumn) {
-            if (this->column_flags == flag::ColumnFlags::NextName) {
-                this->column_flags = flag::ColumnFlags::NextType;
-                this->column_values[0] = std::make_optional(i);
+        if (expr_flags == flag::ExprFlags::NextColumn) {
+            if (column_flags == flag::ColumnFlags::NextName) {
+                column_flags = flag::ColumnFlags::NextType;
+                column_values[0] = std::make_optional(i);
             } else {
                 return Errors::SyntaxErr;
             }
-        } else if (this->expr_flags == flag::ExprFlags::NextString) {
-            if (!this->table_name_index) {
-                this->expr_flags = flag::ExprFlags::NextLeftParen;
+        } else if (expr_flags == flag::ExprFlags::NextString) {
+            if (!table_name_index) {
+                expr_flags = flag::ExprFlags::NextLeftParen;
             } else {
                 std::cout << "expr is false" << std::endl;
             }
-            this->table_name_index = i;
+            table_name_index = i;
         } else {
             return Errors::UnexpectedToken;
         }
@@ -55,13 +60,13 @@ struct CreateTable : AstPush {
     }
 
     inline std::optional<Errors> left_paren_token() {
-        if (this->expr_flags == flag::ExprFlags::NextLeftParen) {
-            this->expr_flags = flag::ExprFlags::NextColumn;
+        if (expr_flags == flag::ExprFlags::NextLeftParen) {
+            expr_flags = flag::ExprFlags::NextColumn;
             // テーブルの名前があるか確認
-            if (this->table_name_index) {
-                this->push_ast<void>(
-                    *this->table_name_index,
-                    NodeKind::Table
+            if (table_name_index) {
+                push_ast<void>(
+                    *table_name_index,
+                    NodeKind::TableName
                 );
             } else {
                 return Errors::MissingTableName;
@@ -76,29 +81,38 @@ struct CreateTable : AstPush {
         constexpr NodeKind column_table[2] = {
             NodeKind::ColumnName,
             NodeKind::ColumnType};
-        
+
+        size_t parent_id = ast.size();
+        add_child_id(
+            0,
+            push_ast<uint8_t>(
+                std::nullopt,
+                NodeKind::Column
+            )
+        );
+
         for (size_t i = 0; i < column_values.size();i++) {
             if (!column_values[i])
                 break;
 
-            this->add_child_id(
-                0,
-                this->push_ast<uint8_t>(
+            add_child_id(
+                parent_id,
+                push_ast<uint8_t>(
                     *column_values[i],
                     column_table[i]
                 )
             );
         }
         // カラムのフラグを初期化
-        std::fill(this->column_values.begin(), this->column_values.end(), std::nullopt);
-        this->column_flags = flag::ColumnFlags::NextName;
-        this->expr_flags = flag::ExprFlags::NextColumn;
+        std::fill(column_values.begin(), column_values.end(), std::nullopt);
+        column_flags = flag::ColumnFlags::NextName;
+        expr_flags = flag::ExprFlags::NextColumn;
 
         return std::nullopt;
     }
 
     inline Errors search_TABLE_err() {
-        if (this->expr_flags == flag::ExprFlags::NextCreate) {
+        if (expr_flags == flag::ExprFlags::NextCreate) {
             return Errors::Missing_CREATE_keyword;
         } else {
             return Errors::SyntaxErr;

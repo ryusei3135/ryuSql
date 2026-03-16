@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
         
         if (ast.has_value()) {
             for (AstNode node: ast.value()) {
-                std::cout << tokens[node.value].value << std::endl;
+                std::cout << tokens[*node.value].value << std::endl;
             }
         } else {
             output_err_log(ast.error());
