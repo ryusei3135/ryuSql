@@ -12,7 +12,7 @@ namespace flag {
 
 struct SelectExpr : AstPush {
     flag::SelectExprFlag expr_flag;
-    std::vector<size_t> column_name;
+    std::vector<uint32_t> column_name;
 
     SelectExpr() {
         expr_flag = flag::SelectExprFlag::NextSelect;
@@ -28,7 +28,7 @@ struct SelectExpr : AstPush {
         return std::nullopt;
     }
 
-    inline std::optional<Errors> token_string(size_t i) {
+    inline std::optional<Errors> token_string(uint32_t i) {
         if (expr_flag == flag::SelectExprFlag::NextColumnName) {
             expr_flag = flag::SelectExprFlag::NextFrom;
             column_name.push_back(i);
@@ -38,7 +38,7 @@ struct SelectExpr : AstPush {
             if (column_name.empty())
                 return Errors::MissingColumn;
 
-            for (size_t index: column_name) {
+            for (uint32_t index: column_name) {
                 add_child_id(
                     0,
                     push_ast<uint8_t>(
@@ -68,7 +68,7 @@ struct SelectExpr : AstPush {
 std::expected<Ast, Errors> select_expr_node(std::vector<Token> tokens) {
     SelectExpr status;
 
-    for (size_t i = 0; i < tokens.size(); i++) {
+    for (uint32_t i = 0; i < tokens.size(); i++) {
         switch (tokens[i].token_kind) {
             case TokenKind::SELECT: {
                 if (auto result = status.token_select())

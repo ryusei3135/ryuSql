@@ -27,8 +27,8 @@ enum class NodeKind {
 
 struct AstNode {
     NodeKind kind;
-    std::optional<size_t> value;
-    std::vector<size_t> children;
+    std::optional<uint32_t> value;
+    std::vector<uint32_t> children;
 };
 
 using Ast = std::vector<AstNode>;
@@ -39,10 +39,10 @@ struct [[nodiscard]] AstPush {
 
     template<typename RetValue>
     RetValue push_ast(
-        std::optional<size_t> index,
+        std::optional<uint32_t> index,
         NodeKind kind
     ) {
-        size_t id = ast.size();
+        uint32_t id = ast.size();
 
         ast.push_back(
             AstNode{
@@ -58,8 +58,8 @@ struct [[nodiscard]] AstPush {
     }
 
     void add_child_id(
-        size_t parent_id, 
-        size_t child_id
+        uint32_t parent_id, 
+        uint32_t child_id
     ) {
         this->ast[parent_id]
             .children

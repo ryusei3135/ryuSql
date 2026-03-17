@@ -12,5 +12,5 @@ enum class OpCode {
 
 struct Instruction {
     OpCode op;
-    std::span<size_t> args;
+    std::array<uint32_t, 2> args;
 };

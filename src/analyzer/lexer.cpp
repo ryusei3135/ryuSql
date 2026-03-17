@@ -2,14 +2,14 @@
 
 
 namespace load {
-    size_t load64_safe(const char* p, size_t remaining) {
-        size_t v = 0;
+    uint32_t load64_safe(const char* p, uint32_t remaining) {
+        uint32_t v = 0;
         memcpy(&v, p, remaining);
         return v;
     }
 
-    size_t load64(const char* p) {
-        size_t v = 0;
+    uint32_t load64(const char* p) {
+        uint32_t v = 0;
         memcpy(&v, p, 8);
         return v;
     }
@@ -44,13 +44,13 @@ constexpr std::array<CharKinds, 256> init_char_kind_table() {
 
 std::vector<Token> input_sql_query(char* ascii_sql_query) {
     Stack token_stack = {};
-    size_t size = strlen(ascii_sql_query);
-    size_t query_ptr = 0;
+    uint32_t size = strlen(ascii_sql_query);
+    uint32_t query_ptr = 0;
     uint8_t loop_count = 8;
     std::array<CharKinds,256> char_table = init_char_kind_table();
 
     while (query_ptr < size) {
-        size_t chunk
+        uint32_t chunk
             = query_ptr + 8 > size
             ? load::load64_safe(
                 ascii_sql_query + query_ptr, 
