@@ -21,6 +21,7 @@ enum class NodeKind {
     Column,
     ColumnName,
     ColumnType,
+    Select,
     SelectColumn,
     SelectTable,
 };
@@ -51,7 +52,7 @@ struct AstPush {
             }
         );
 
-            return id;
+        return id;
     }
 
     void add_child_id(

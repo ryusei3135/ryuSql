@@ -12,6 +12,8 @@ enum class Errors {
     UnexpectedToken,
     InvaildColumn,
     SyntaxErr,
+
+    UnexpectedNode,
 };
 
 void output_err_log(Errors err_kind);

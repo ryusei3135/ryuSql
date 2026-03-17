@@ -12,7 +12,7 @@ namespace flag {
 
 struct SelectExpr : AstPush {
     flag::SelectExprFlag expr_flag;
-    std::vector<uint32_t> column_name;
+    std::vector<size_t> column_name;
 
     SelectExpr() {
         expr_flag = flag::SelectExprFlag::NextSelect;
@@ -28,19 +28,20 @@ struct SelectExpr : AstPush {
         return std::nullopt;
     }
 
-    inline std::optional<Errors> token_string(uint32_t i) {
+    inline std::optional<Errors> token_string(size_t i) {
         if (expr_flag == flag::SelectExprFlag::NextColumnName) {
             expr_flag = flag::SelectExprFlag::NextFrom;
             column_name.push_back(i);
         } else if (expr_flag == flag::SelectExprFlag::NextTableName) {
-            push_ast(i, NodeKind::SelectTable);
-
+            size_t parent_id = push_ast(std::nullopt, NodeKind::Select);
+            // テーブルを指定
+            add_child_id(parent_id, push_ast(i, NodeKind::SelectTable));
             if (column_name.empty())
                 return Errors::MissingColumn;
 
-            for (uint32_t index: column_name) {
+            for (size_t index: column_name) {
                 add_child_id(
-                    0,
+                    parent_id,
                     push_ast(
                         index,
                         NodeKind::SelectColumn
@@ -68,7 +69,7 @@ struct SelectExpr : AstPush {
 std::expected<Ast, Errors> select_expr_node(std::vector<Token> tokens) {
     SelectExpr status;
 
-    for (uint32_t i = 0; i < tokens.size(); i++) {
+    for (size_t i = 0; i < tokens.size(); i++) {
         switch (tokens[i].token_kind) {
             case TokenKind::SELECT: {
                 if (auto result = status.token_select())
