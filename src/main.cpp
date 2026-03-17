@@ -1,6 +1,7 @@
 #include "analy.hpp"
 #include "parser.hpp"
 #include "ir.hpp"
+#include "exec.hpp"
 
 
 int main(int argc, char *argv[]) {
@@ -9,7 +10,10 @@ int main(int argc, char *argv[]) {
         std::expected<Ast, Errors> ast = ganarate_ast(tokens);
         
         if (ast.has_value()) {
-            build_ir(ast.value());
+            std::expected<IR, Errors> ir = build_ir(ast.value());
+            if (ir.has_value()) {
+                executor(ir.value(), tokens);
+            }
         } else {
             output_err_log(ast.error());
         }

@@ -41,4 +41,4 @@ namespace ApiIR {
     std::expected<IR, Errors> select_expr(Ast& ast, size_t* i);
 };
 
-void build_ir(Ast& ast);
+std::expected<IR, Errors> build_ir(Ast& ast);
