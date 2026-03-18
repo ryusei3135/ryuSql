@@ -14,6 +14,9 @@ enum class TokenKind {
     Comma,
     Semicolon,
     ColumnType,
+    Insert,
+    Into,
+    Values,
 };
 
 struct Token {

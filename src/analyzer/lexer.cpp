@@ -42,7 +42,7 @@ constexpr std::array<CharKinds, 256> init_char_kind_table() {
     return table;
 }
 
-std::vector<Token> input_sql_query(char* ascii_sql_query) {
+std::vector<Token> input_sql_query(const char* ascii_sql_query) {
     Stack token_stack = {};
     size_t size = strlen(ascii_sql_query);
     size_t query_ptr = 0;

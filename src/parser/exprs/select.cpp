@@ -37,7 +37,7 @@ struct SelectExpr : AstPush {
             // テーブルを指定
             add_child_id(parent_id, push_ast(i, NodeKind::SelectTable));
             if (column_name.empty())
-                return Errors::MissingColumn;
+                return Errors::MissingToken;
 
             for (size_t index: column_name) {
                 add_child_id(

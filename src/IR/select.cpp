@@ -23,5 +23,6 @@ std::expected<IR, Errors> ApiIR::select_expr(Ast& ast, size_t* i) {
         *i = count;
     }
 
+    builder.push_ir(OpCode::SelectEnd, 0);
     return std::move(builder.ir);
 }

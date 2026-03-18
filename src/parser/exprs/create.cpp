@@ -12,37 +12,22 @@ namespace flag {
         NextColumn,
         NextRightParen,
     };
-
-    // カラムのノードを作成する際に、次に予約するトークンの種類
-    enum class ColumnFlags {
-        NextName,
-        NextType,
-    };
 };
 
 struct CreateTable : AstPush {
     flag::ExprFlags expr_flags;
-    flag::ColumnFlags column_flags;
     std::array<std::optional<size_t>, 2> column_values{};
     std::optional<size_t> table_name_index;
     std::optional<size_t> parent_id;
 
     CreateTable() {
         expr_flags = flag::ExprFlags::NextCreate;
-        column_flags = flag::ColumnFlags::NextName;
         table_name_index = std::nullopt;
         parent_id = std::nullopt;
     }
 
     inline std::optional<Errors> string_token(size_t i) {
-        if (expr_flags == flag::ExprFlags::NextColumn) {
-            if (column_flags == flag::ColumnFlags::NextName) {
-                column_flags = flag::ColumnFlags::NextType;
-                column_values[0] = std::make_optional(i);
-            } else {
-                return Errors::SyntaxErr;
-            }
-        } else if (expr_flags == flag::ExprFlags::NextString) {
+        if (expr_flags == flag::ExprFlags::NextString) {
             if (!table_name_index) {
                 expr_flags = flag::ExprFlags::NextLeftParen;
             } else {
@@ -56,62 +41,9 @@ struct CreateTable : AstPush {
         return std::nullopt;
     }
 
-    inline std::optional<Errors> left_paren_token() {
-        if (expr_flags == flag::ExprFlags::NextLeftParen) {
-            expr_flags = flag::ExprFlags::NextColumn;
-            // テーブルの名前があるか確認
-            if (table_name_index) {
-                parent_id = push_ast(std::nullopt, NodeKind::Table);
-                add_child_id(
-                    parent_id.value(),
-                    push_ast(
-                        *table_name_index,
-                        NodeKind::TableName
-                    )
-                );
-            } else {
-                return Errors::MissingTableName;
-            }
-        } else {
-            return Errors::SyntaxErr;
-        }
-        return std::nullopt;
-    }
-
-    inline std::optional<Errors> generate_column_node() {
-        constexpr NodeKind column_table[2] = {
-            NodeKind::ColumnName,
-            NodeKind::ColumnType};
-        // カラムノードのヘッダを作成
-        size_t head_id = push_ast(
-            std::nullopt,
-            NodeKind::Column
-        );
-        add_child_id(parent_id.value(), head_id);
-        // カラムのデータを作成
-        for (size_t i = 0; i < column_values.size();i++) {
-            if (!column_values[i])
-                break;
-
-            add_child_id(
-                head_id,
-                push_ast(
-                    *column_values[i],
-                    column_table[i]
-                )
-            );
-        }
-        // カラムのフラグを初期化
-        std::fill(column_values.begin(), column_values.end(), std::nullopt);
-        column_flags = flag::ColumnFlags::NextName;
-        expr_flags = flag::ExprFlags::NextColumn;
-
-        return std::nullopt;
-    }
-
     inline Errors search_TABLE_err() {
         if (expr_flags == flag::ExprFlags::NextCreate) {
-            return Errors::Missing_CREATE_keyword;
+            return Errors::MissingToken;
         } else {
             return Errors::SyntaxErr;
         }
@@ -153,33 +85,20 @@ std::expected<Ast, Errors> create_expr_node(const std::vector<Token>& tokens) {
                 break;
             }
             case TokenKind::LeftParen: {
-                if (auto result = status.left_paren_token())
-                    return std::unexpected(result.value());
-                break;
-            }
-            case TokenKind::RightParen: {
-                // テーブルの定義が終了
-                if (status.expr_flags == flag::ExprFlags::NextColumn) {
-                    if (status.column_values[0] && status.column_values[1])
-                        if (auto result = status.generate_column_node())
-                            return std::unexpected(result.value());
-                    return status.ast;
-                } else {
-                    return std::unexpected(Errors::Missing_left_paren_token);
+                if (status.expr_flags == flag::ExprFlags::NextLeftParen) {
+                    auto result = generate_paren_node<ExprKind::CreateTable>
+                        (tokens, &++i);
+                    if (result.has_value()) {
+                        auto value = result.value();
+                        status.ast.insert(
+                            status.ast.end(), 
+                            value.begin(), 
+                            value.end()
+                        );
+                    } else {
+                        return result;
+                    }
                 }
-                break;
-            }
-            case TokenKind::ColumnType: {
-                if (status.column_flags == flag::ColumnFlags::NextType) {
-                    status.column_values[1] = i;
-                } else {
-                    return std::unexpected(Errors::SyntaxErr);
-                }
-                break;
-            }
-            case TokenKind::Comma: {
-                if (auto result = status.generate_column_node())
-                    return std::unexpected(result.value());
                 break;
             }
             default: {
@@ -188,5 +107,5 @@ std::expected<Ast, Errors> create_expr_node(const std::vector<Token>& tokens) {
         }
     }
 
-    return status.get_ast();
+    return std::unexpected(Errors::MissingToken);
 }

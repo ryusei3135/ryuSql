@@ -29,4 +29,4 @@ struct Stack {
 };
 
 // lexer.cpp
-std::vector<Token> input_sql_query(char* ascii_sql_query);
+std::vector<Token> input_sql_query(const char* ascii_sql_query);

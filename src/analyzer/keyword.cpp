@@ -31,6 +31,8 @@ inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
                 return TokenKind::FROM;
             } else if (token == "TEXT") {
                 return TokenKind::ColumnType;
+            } else if (token == "INTO") {
+                return TokenKind::Into;
             }
             break;
         }
@@ -45,6 +47,10 @@ inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
                 return TokenKind::SELECT;
             } else if (token == "CREATE") {
                 return TokenKind::CREATE;
+            } else if (token == "INSERT") {
+                return TokenKind::Insert;
+            } else if (token == "VALUES") {
+                return TokenKind::Values;
             }
             break;
         }
