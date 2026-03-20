@@ -15,39 +15,12 @@ namespace load {
     }
 }
 
-constexpr std::array<CharKinds, 256> init_char_kind_table() {
-    std::array<CharKinds, 256> table{};
-
-    for (int i = 0; i < 256; i++)
-        table[i] = CharKinds::Other;
-
-    table[' '] = CharKinds::Space;
-    table['\t'] = CharKinds::Space;
-    table['\n'] = CharKinds::Space;
-
-    table['('] = CharKinds::Symbol;
-    table[')'] = CharKinds::Symbol;
-    table[','] = CharKinds::Symbol;
-    table[';'] = CharKinds::Symbol;
-
-    for (int i = 'a'; i <= 'z'; i++)
-        table[i] = CharKinds::Letter;
-
-    for (int i = 'A'; i <= 'Z'; i++)
-        table[i] = CharKinds::Letter;
-
-    for (int i = '0'; i <= '9'; i++)
-        table[i] = CharKinds::Digit;
-
-    return table;
-}
-
 std::vector<Token> input_sql_query(const char* ascii_sql_query) {
     Stack token_stack = {};
     size_t size = strlen(ascii_sql_query);
     size_t query_ptr = 0;
     uint8_t loop_count = 8;
-    std::array<CharKinds,256> char_table = init_char_kind_table();
+    const std::array<CharKinds, 256> char_table = init_char_table<CharKinds>();
 
     while (query_ptr < size) {
         size_t chunk

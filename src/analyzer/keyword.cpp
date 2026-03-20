@@ -2,19 +2,16 @@
 
 
 inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
+    const std::array<TokenKind, 256> table = init_char_table<TokenKind>();
     if (kind == CharKinds::Digit) {
         return TokenKind::NUMBER;
     } else if (kind == CharKinds::Symbol) {
         if (token.length() == 1) {
-            switch (token[0]) {
-                case '(':
-                    return TokenKind::LeftParen;
-                case ')':
-                    return TokenKind::RightParen;
-                case ',':
-                    return TokenKind::Comma;
-                case ';':
-                    return TokenKind::Semicolon;
+            TokenKind token_kind = table[token[0]];
+            if (token_kind != TokenKind::Null) {
+                return token_kind;
+            } else {
+                std::cerr << "invaild token kind:" << token[0] << std::endl;
             }
         }
     }
@@ -31,8 +28,6 @@ inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
                 return TokenKind::FROM;
             } else if (token == "TEXT") {
                 return TokenKind::ColumnType;
-            } else if (token == "INTO") {
-                return TokenKind::Into;
             }
             break;
         }
@@ -46,10 +41,6 @@ inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
                 return TokenKind::SELECT;
             } else if (token == "CREATE") {
                 return TokenKind::CREATE;
-            } else if (token == "INSERT") {
-                return TokenKind::Insert;
-            } else if (token == "VALUES") {
-                return TokenKind::Values;
             }
             break;
         }
