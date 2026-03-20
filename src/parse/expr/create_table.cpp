@@ -18,14 +18,15 @@ auto create_CREATE_TABLE_node(
 
     while (count < tokens.size()) {
         switch (tokens[count].token_kind) {
-            case TokenKind::TABLE:
+            case TokenKind::TABLE: {
                 if (expect == ExpectToken::Token_TABLE_) {
                     expect = ExpectToken::TokenTableName;
                     break;
                 } else {
                     return std::unexpected(Errors::UnexpectTokenKind);
                 }
-            case TokenKind::STRING:
+            }
+            case TokenKind::STRING: {
                 if (expect == ExpectToken::TokenTableName) {
                     ast.push_back(AstNode::make(count, NodeKind::CreateTable));
                     expect = ExpectToken::TokenLeftParen;
@@ -33,17 +34,20 @@ auto create_CREATE_TABLE_node(
                 } else {
                     return std::unexpected(Errors::UnexpectTokenKind);
                 }
-            case TokenKind::LeftParen:
+            }
+            case TokenKind::LeftParen: {
                 if (expect == ExpectToken::TokenLeftParen) {
                     if (auto err = create_paren_node<NodeKind::CreateTable>
                         (&ast, tokens, &++count)
                     ) {
                         return std::unexpected(err.value());
                     }
+                    *i = count;
                     return ast;
                 } else {
                     return std::unexpected(Errors::UnexpectTokenKind);
                 }
+            }
             default:
                 return std::unexpected(Errors::UnexpectTokenKind);
         }

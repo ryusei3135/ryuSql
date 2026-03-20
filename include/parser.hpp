@@ -10,6 +10,7 @@ enum class NodeKind {
     CreateTable,
     ColumnName,
     ColumnType,
+    TableName,
     Select,
 };
 
@@ -29,9 +30,15 @@ struct AstNode {
 
 using Ast = std::vector<AstNode>;
 
+// create.cpp
 auto create_CREATE_TABLE_node(
     std::vector<Token>& tokens, 
     size_t* i
 ) -> std::expected<Ast, Errors>;
+// select.cpp
+auto create_SELECT_node(
+    std::vector<Token>& tokens, 
+    size_t* i
+) -> std::expected<Ast, Errors>;
 
-std::optional<Errors> create_ast(Ast* ast, std::vector<Token>& tokens);
+std::expected<Ast, Errors> create_ast(std::vector<Token>& tokens);

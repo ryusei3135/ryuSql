@@ -12,13 +12,13 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        auto err = create_ast(&ast, tokens.value());
-        if (err.has_value()) {
-            std::cout << (int)err.value() << ":[err]ast" << std::endl;
+        auto result = create_ast(tokens.value());
+        if (!result.has_value()) {
+            std::cout << (int)result.error() << ":[err]ast" << std::endl;
             return 1;
         }
 
-        for (auto n: ast) {
+        for (auto n: result.value()) {
             std::cout << n.value << std::endl;
         }
     }
