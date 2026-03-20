@@ -21,16 +21,6 @@ enum class CharKinds {
     NONE,
 };
 
-struct Stack {
-    std::string value;
-    std::vector<Token> tokens;
-    CharKinds last_kind = CharKinds::NONE;
-    char last_char = '\0';
-
-    void stack_char(const char chr, CharKinds kind);
-    void exit();
-};
-
 // テーブルの初期化
 template<typename T>
 concept EnumOnly = std::is_enum_v<T>;

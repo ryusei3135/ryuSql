@@ -1,6 +1,93 @@
 #include "analy.hpp"
 
 
+constexpr uint32_t hash(std::string target) {
+    uint32_t h = 0;
+    for (char c : target) {
+        h = h * 31 + c;
+    }
+    return h;
+}
+
+class Stack {
+public:
+    std::vector<Token> tokens;
+
+    void stack_char(const char chr, CharKinds kind) {
+        if (check_stackable(kind)) {
+            tokens.push_back(
+                Token {
+                    value,
+                    categorize_token_kind(value, last_kind),
+                }
+            );
+
+            value.clear();
+        }
+
+        if (kind != CharKinds::Space) {
+            value.push_back(chr);
+        }
+        this->last_kind = kind;
+    }
+    
+    void exit() {
+        if (value.length()) {
+            tokens.push_back(
+                Token {
+                    value,
+                    categorize_token_kind(value, last_kind),
+                }
+            );
+
+            value.clear();
+        }
+    }
+private:
+    std::string value;
+    CharKinds last_kind = CharKinds::NONE;
+    char last_char = '\0';
+    
+    inline bool check_stackable(
+        CharKinds kind
+    ) {
+        return 
+            (value.length()
+            && last_kind != kind
+            && (kind != CharKinds::Symbol || last_kind != CharKinds::Symbol)
+            && last_kind != CharKinds::NONE
+            && last_kind != CharKinds::Space)
+            || kind == CharKinds::Symbol && last_kind == kind;
+    }
+
+    inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
+        if (kind == CharKinds::Digit) {
+            return TokenKind::NUMBER;
+        } else if (kind == CharKinds::Symbol) {
+            if (token.length() == 1) {
+                const TokenKind token_kind
+                    = init_char_table<TokenKind>()[token[0]];
+                if (token_kind != TokenKind::Null) {
+                    return token_kind;
+                } else {
+                    std::cerr << "invaild token kind:" << token[0] << std::endl;
+                }
+            }
+        }
+
+        switch (hash(token)) {
+            case hash("INT"): return TokenKind::ColumnType;
+            case hash("TEXT"): return TokenKind::ColumnType;
+            case hash("FROM"): return TokenKind::FROM;
+            case hash("TABLE"): return TokenKind::TABLE;
+            case hash("SELECT"): return TokenKind::SELECT;
+            case hash("CREATE"): return TokenKind::CREATE;
+        }
+
+        return TokenKind::STRING;
+    }
+};
+
 namespace load {
     size_t load64_safe(const char* p, size_t remaining) {
         size_t v = 0;
