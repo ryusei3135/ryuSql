@@ -1,13 +1,21 @@
 #include "analy.hpp"
 
 
+constexpr uint32_t hash(std::string target) {
+    uint32_t h = 0;
+    for (char c : target) {
+        h = h * 31 + c;
+    }
+    return h;
+}
+
 inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
-    const std::array<TokenKind, 256> table = init_char_table<TokenKind>();
     if (kind == CharKinds::Digit) {
         return TokenKind::NUMBER;
     } else if (kind == CharKinds::Symbol) {
         if (token.length() == 1) {
-            TokenKind token_kind = table[token[0]];
+            const TokenKind token_kind
+                = init_char_table<TokenKind>()[token[0]];
             if (token_kind != TokenKind::Null) {
                 return token_kind;
             } else {
@@ -16,34 +24,13 @@ inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
         }
     }
 
-    switch (token.length()) {
-        case 3: {
-            if (token == "INT") {
-                return TokenKind::ColumnType;
-            }
-            break;
-        }
-        case 4: {
-            if (token == "FROM") {
-                return TokenKind::FROM;
-            } else if (token == "TEXT") {
-                return TokenKind::ColumnType;
-            }
-            break;
-        }
-        case 5: {
-            if (token == "TABLE")
-                return TokenKind::TABLE;
-            break;
-        }
-        case 6: {
-            if (token == "SELECT") {
-                return TokenKind::SELECT;
-            } else if (token == "CREATE") {
-                return TokenKind::CREATE;
-            }
-            break;
-        }
+    switch (hash(token)) {
+        case hash("INT"): return TokenKind::ColumnType;
+        case hash("TEXT"): return TokenKind::ColumnType;
+        case hash("FROM"): return TokenKind::FROM;
+        case hash("TABLE"): return TokenKind::TABLE;
+        case hash("SELECT"): return TokenKind::SELECT;
+        case hash("CREATE"): return TokenKind::CREATE;
     }
 
     return TokenKind::STRING;

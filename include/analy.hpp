@@ -37,7 +37,7 @@ concept EnumOnly = std::is_enum_v<T>;
 
 template<EnumOnly T>
 consteval const std::array<T, 256> init_char_table() {
-    using FillValues = std::vector<std::pair<std::array<char, 2>, CharKinds>>;
+    using FillValues = std::vector<std::pair<std::array<char, 2>, T>>;
     auto fill_table = [&](auto& table, std::array<char, 2> range, T value) {
         for (int i = range[0]; i <= range[1]; i++)
             table[i] = value;
