@@ -13,35 +13,39 @@ class Stack {
 public:
     std::vector<Token> tokens;
 
-    void stack_char(const char chr, CharKinds kind) {
-        if (check_stackable(kind)) {
-            tokens.push_back(
-                Token {
-                    value,
-                    categorize_token_kind(value, last_kind),
-                }
-            );
+    auto stack_char(
+        const char chr, 
+        CharKinds kind
+    ) -> std::optional<Errors> {
+        auto result = categorize_token_kind(value, last_kind);
+        if (!result.has_value()) {
+            last_kind = kind;
+            return result.error();
+        }
 
+        if (check_stackable(kind)) {
+            tokens.push_back(Token {value, result.value().value()});
             value.clear();
         }
 
-        if (kind != CharKinds::Space) {
+        if (kind != CharKinds::Space)
             value.push_back(chr);
-        }
         this->last_kind = kind;
+        return std::nullopt;
     }
     
-    void exit() {
-        if (value.length()) {
-            tokens.push_back(
-                Token {
-                    value,
-                    categorize_token_kind(value, last_kind),
-                }
-            );
+    std::optional<Errors> exit() {
+        auto result = categorize_token_kind(value, last_kind);
+        if (!result.has_value())
+            return result.error();
+        if (!result.value().has_value())// 空白は無視する
+            return std::nullopt;
 
+        if (value.length()) {
+            tokens.push_back(Token {value, result.value().value()});
             value.clear();
         }
+        return std::nullopt;
     }
 private:
     std::string value;
@@ -60,31 +64,52 @@ private:
             || kind == CharKinds::Symbol && last_kind == kind;
     }
 
-    inline TokenKind categorize_token_kind(std::string token, CharKinds kind) {
-        if (kind == CharKinds::Digit) {
-            return TokenKind::NUMBER;
-        } else if (kind == CharKinds::Symbol) {
-            if (token.length() == 1) {
-                const TokenKind token_kind
-                    = init_char_table<TokenKind>()[token[0]];
-                if (token_kind != TokenKind::Null) {
-                    return token_kind;
+    inline auto categorize_token_kind(
+        std::string token, 
+        CharKinds kind
+    ) -> std::expected<std::optional<TokenKind>, Errors> {
+        switch (kind) {
+            case CharKinds::Digit: return TokenKind::NUMBER;
+            case CharKinds::Symbol: {
+                if (token.length() == 1) {
+                    const TokenKind token_kind
+                        = init_char_table<TokenKind>()[token[0]];
+                    if (token_kind != TokenKind::Null) {
+                        return token_kind;
+                    } else {
+                        std::cerr << "invaild token kind:" << token[0] << std::endl;
+                        return std::unexpected(Errors::InvalidTokenKind);
+                    }
                 } else {
-                    std::cerr << "invaild token kind:" << token[0] << std::endl;
+                    return std::unexpected(Errors::InvalidString);
                 }
             }
+            case CharKinds::Letter: {
+                switch (hash(token)) {
+                    case hash("INT"):
+                        return TokenKind::ColumnType;
+                    case hash("TEXT"):
+                        return TokenKind::ColumnType;
+                    case hash("FROM"): 
+                        return TokenKind::FROM;
+                    case hash("TABLE"):
+                        return TokenKind::TABLE;
+                    case hash("SELECT"):
+                        return TokenKind::SELECT;
+                    case hash("CREATE"): 
+                        return TokenKind::CREATE;
+                }
+                return TokenKind::STRING;
+            }
+            case CharKinds::Space: 
+                return std::nullopt;
+            case CharKinds::NONE:
+                return std::nullopt;
+            default: {
+                std::cout << token << "]:[" << (int)kind << std::endl;
+                return std::unexpected(Errors::InvalidTokenKind);
+            }
         }
-
-        switch (hash(token)) {
-            case hash("INT"): return TokenKind::ColumnType;
-            case hash("TEXT"): return TokenKind::ColumnType;
-            case hash("FROM"): return TokenKind::FROM;
-            case hash("TABLE"): return TokenKind::TABLE;
-            case hash("SELECT"): return TokenKind::SELECT;
-            case hash("CREATE"): return TokenKind::CREATE;
-        }
-
-        return TokenKind::STRING;
     }
 };
 
@@ -102,7 +127,9 @@ namespace load {
     }
 }
 
-std::vector<Token> input_sql_query(const char* ascii_sql_query) {
+auto input_sql_query(
+    const char* ascii_sql_query
+) -> std::expected<std::vector<Token>, Errors> {
     Stack token_stack = {};
     size_t size = strlen(ascii_sql_query);
     size_t query_ptr = 0;
@@ -119,7 +146,8 @@ std::vector<Token> input_sql_query(const char* ascii_sql_query) {
 
         for(int i = 0;i < loop_count; i++) {
             uint8_t c = (chunk >> (i*8)) & 0xff;
-            token_stack.stack_char(c, char_table[c]);
+            if (auto err = token_stack.stack_char(c, char_table[c]))
+                return std::unexpected(err.value());
         }
 
         query_ptr += loop_count;

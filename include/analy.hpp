@@ -8,6 +8,10 @@
 #include <concepts>
 #include <utility>
 #include <cstring>
+#include <expected>
+#include <optional>
+
+#include "error.hpp"
 
 enum class CharKinds {
     Letter,
@@ -76,4 +80,6 @@ consteval const std::array<T, 256> init_char_table() {
 }
 
 // lexer.cpp
-std::vector<Token> input_sql_query(const char* ascii_sql_query);
+auto input_sql_query(
+    const char* ascii_sql_query
+) -> std::expected<std::vector<Token>, Errors>;
