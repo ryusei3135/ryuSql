@@ -11,6 +11,8 @@ enum class NodeKind {
     ColumnName,
     ColumnType,
     TableName,
+    InsertValues,
+    InsertColumns,
     Select,
 };
 
@@ -40,5 +42,10 @@ auto create_SELECT_node(
     std::vector<Token>& tokens, 
     size_t* i
 ) -> std::expected<Ast, Errors>;
+// insert.cpp
+std::expected<Ast, Errors> create_INSERT_node(
+    std::vector<Token> tokens, 
+    size_t* i
+);
 
 std::expected<Ast, Errors> create_ast(std::vector<Token>& tokens);

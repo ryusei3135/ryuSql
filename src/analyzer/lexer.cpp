@@ -98,6 +98,12 @@ private:
                         return TokenKind::SELECT;
                     case hash("CREATE"): 
                         return TokenKind::CREATE;
+                    case hash("INSERT"):
+                        return TokenKind::INSERT;
+                    case hash("INTO"):
+                        return TokenKind::INTO;
+                    case hash("VALUES"):
+                        return TokenKind::VALUES;
                 }
                 return TokenKind::STRING;
             }

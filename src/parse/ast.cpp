@@ -27,6 +27,11 @@ std::expected<Ast, Errors> create_ast(std::vector<Token>& tokens) {
                     return std::unexpected(err.value());
                 break;
             }
+            case TokenKind::INSERT: {
+                if (auto err = connect_node(create_INSERT_node, &++i))
+                    return std::unexpected(err.value());
+                break;
+            }
             default:
                 break;
         }

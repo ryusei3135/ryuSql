@@ -8,7 +8,7 @@ enum class SelectExpectToken {
 };
 
 auto create_SELECT_node(
-    std::vector<Token>& tokens, 
+    std::vector<Token>& tokens,
     size_t* i
 ) -> std::expected<Ast, Errors> {
     SelectExpectToken expect = SelectExpectToken::TokenColumnName;
