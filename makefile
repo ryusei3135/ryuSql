@@ -1,8 +1,9 @@
 CXX = g++
 CXXFLAGS = -O2 -std=c++23 -Iinclude
 
+BUILD = build
 SRC = $(shell find src -name "*.cpp")
-OBJ = $(SRC:.cpp=.o)
+OBJ = $(patsubst src/%.cpp,$(BUILD)/%.o,$(SRC))
 
 TARGET = db
 
@@ -11,8 +12,9 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	$(CXX) $(OBJ) -o $(TARGET)
 
-%.o: %.cpp
+$(BUILD)/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(BUILD) $(TARGET)

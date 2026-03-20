@@ -3,14 +3,11 @@
 #include <string>
 #include <iostream>
 #include <cstdint>
-#include <cstring>
 #include <vector>
 #include <array>
 #include <concepts>
 #include <utility>
-#include <string>
-
-#include "token.hpp"
+#include <cstring>
 
 enum class CharKinds {
     Letter,
@@ -19,6 +16,26 @@ enum class CharKinds {
     Symbol,
     Other,
     NONE,
+};
+
+enum class TokenKind {
+    FROM,
+    TABLE,
+    SELECT,
+    CREATE,
+    STRING,
+    NUMBER,
+    LeftParen,
+    RightParen,
+    Comma,
+    Semicolon,
+    ColumnType,
+    Null,
+};
+
+struct Token {
+    std::string value;
+    TokenKind token_kind;
 };
 
 // テーブルの初期化
