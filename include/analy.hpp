@@ -42,14 +42,15 @@ consteval const std::array<T, 256> init_char_table() {
     std::array<T, 256> table{};
 
     if constexpr (std::is_same_v<T, CharKinds>) {
+        // 初期化
         fill_table(table, std::array{(char)0, (char)255}, CharKinds::Other);
+        // 空白
         fill_table(table, std::array{(char)9, (char)0x13}, CharKinds::Space);
         table[' '] = CharKinds::Space;
-        table['('] = CharKinds::Symbol;
-        table[')'] = CharKinds::Symbol;
-        table[','] = CharKinds::Symbol;
-        table[';'] = CharKinds::Symbol;
-
+        // 記号
+        fill_table(table, std::array{'!', '/'}, CharKinds::Symbol);
+        fill_table(table, std::array{':', '@'}, CharKinds::Symbol);
+        // アルファベット
         fill_table(table, std::array{'A', 'Z'}, CharKinds::Letter);
         fill_table(table, std::array{'a', 'z'}, CharKinds::Letter);
         fill_table(table, std::array{'0', '9'}, CharKinds::Digit);
