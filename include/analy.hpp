@@ -7,6 +7,8 @@
 #include <vector>
 #include <array>
 #include <concepts>
+#include <utility>
+#include <string>
 
 #include "token.hpp"
 
@@ -35,6 +37,7 @@ concept EnumOnly = std::is_enum_v<T>;
 
 template<EnumOnly T>
 consteval const std::array<T, 256> init_char_table() {
+    using FillValues = std::vector<std::pair<std::array<char, 2>, CharKinds>>;
     auto fill_table = [&](auto& table, std::array<char, 2> range, T value) {
         for (int i = range[0]; i <= range[1]; i++)
             table[i] = value;
@@ -42,18 +45,18 @@ consteval const std::array<T, 256> init_char_table() {
     std::array<T, 256> table{};
 
     if constexpr (std::is_same_v<T, CharKinds>) {
-        // 初期化
-        fill_table(table, std::array{(char)0, (char)255}, CharKinds::Other);
-        // 空白
-        fill_table(table, std::array{(char)9, (char)0x13}, CharKinds::Space);
+        FillValues fill_values_list = {
+            {{(char)0, (char)255}, CharKinds::Other},
+            {{(char)9, (char)13}, CharKinds::Space},
+            {{'!', '/'}, CharKinds::Symbol},
+            {{':', '@'}, CharKinds::Symbol},
+            {{'A', 'Z'}, CharKinds::Letter},
+            {{'a', 'z'}, CharKinds::Letter},
+            {{'0', '9'}, CharKinds::Digit}
+        };
+        for (auto [range, fill_value]: fill_values_list)
+            fill_table(table, range, fill_value);
         table[' '] = CharKinds::Space;
-        // 記号
-        fill_table(table, std::array{'!', '/'}, CharKinds::Symbol);
-        fill_table(table, std::array{':', '@'}, CharKinds::Symbol);
-        // アルファベット
-        fill_table(table, std::array{'A', 'Z'}, CharKinds::Letter);
-        fill_table(table, std::array{'a', 'z'}, CharKinds::Letter);
-        fill_table(table, std::array{'0', '9'}, CharKinds::Digit);
     } else {
         fill_table(table, std::array{(char)0, (char)255}, TokenKind::Null);
         table['('] = TokenKind::LeftParen;
