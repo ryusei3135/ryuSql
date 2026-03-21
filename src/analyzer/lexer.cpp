@@ -1,4 +1,5 @@
 #include "analy.hpp"
+#include "debug.hpp"
 
 
 constexpr uint32_t hash(std::string target) {
@@ -15,7 +16,7 @@ public:
 
     auto stack_char(
         const char chr, 
-        CharKinds kind
+        const CharKinds kind
     ) -> std::optional<Errors> {
         auto result = categorize_token_kind(value, last_kind);
         if (!result.has_value()) {
@@ -53,7 +54,7 @@ private:
     char last_char = '\0';
     
     inline bool check_stackable(
-        CharKinds kind
+        const CharKinds kind
     ) {
         return 
             (value.length()
@@ -65,8 +66,8 @@ private:
     }
 
     inline auto categorize_token_kind(
-        std::string token, 
-        CharKinds kind
+        const std::string& token, 
+        const CharKinds kind
     ) -> std::expected<std::optional<TokenKind>, Errors> {
         switch (kind) {
             case CharKinds::Digit: return TokenKind::NUMBER;
@@ -77,10 +78,21 @@ private:
                     if (token_kind != TokenKind::Null) {
                         return token_kind;
                     } else {
-                        std::cerr << "invaild token kind:" << token[0] << std::endl;
+                        #ifdef DEBUG
+                        std::cerr
+                            << "[lexer:err]: invalid token kind.; "
+                            << "[func:categorize_token_kind]: Symbol"
+                            << std::endl;
+                        #endif
                         return std::unexpected(Errors::InvalidTokenKind);
                     }
-                } else {
+                } else { // この長さの記号の文字列はトークンで使えません。
+                    #ifdef DEBUG
+                    std::cerr 
+                        << "[lexer:err]: This string token cannot be used.; "
+                        << "[func:categorize_token_kind]: Symbol"
+                        << std::endl;
+                    #endif
                     return std::unexpected(Errors::InvalidString);
                 }
             }
@@ -112,7 +124,11 @@ private:
             case CharKinds::NONE:
                 return std::nullopt;
             default: {
-                std::cout << token << "]:[" << (int)kind << std::endl;
+                #ifdef DEBUG
+                std::cerr
+                    << "[lexer:err]: invalid token kind;"
+                    << std::endl;
+                #endif
                 return std::unexpected(Errors::InvalidTokenKind);
             }
         }
@@ -152,8 +168,15 @@ auto input_sql_query(
 
         for(int i = 0;i < loop_count; i++) {
             uint8_t c = (chunk >> (i*8)) & 0xff;
-            if (auto err = token_stack.stack_char(c, char_table[c]))
+            if (auto err = token_stack.stack_char(c, char_table[c])) {
+                #ifdef DEBUG // 現在このスタックが無効である
+                std::cerr
+                    << "[lexer:err]: invalid stack; "
+                    << "[func:input_sql_query]"
+                    << std::endl;
+                #endif
                 return std::unexpected(err.value());
+            }
         }
 
         query_ptr += loop_count;

@@ -1,0 +1,8 @@
+enum_name: AstNodeKind
+member_names:
+  - OpCreateTable
+  - OpInsert
+  - OpSelect
+  - ColumnName
+  - ColumnType
+  - TableName
