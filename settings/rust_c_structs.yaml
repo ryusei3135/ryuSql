@@ -1,5 +1,20 @@
-enum_name: AstNodeKind
-member_names:
+ast: Ast
+ast_member:
+  -
+    - value
+    - usize
+  - 
+    - kind
+    - AstNodeKind
+  -
+    - left
+    - usize
+  -
+    - right
+    - usize
+
+ast_kind: AstNodeKind
+ast_kind_member:
   - OpCreateTable
   - OpInsert
   - OpSelect
@@ -8,7 +23,7 @@ member_names:
   - TableName
 
 token_struct: Token
-token_member:
+token_struct_member:
   -
     - value
     - String
