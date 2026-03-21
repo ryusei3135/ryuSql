@@ -1,5 +1,6 @@
 
 
+#[repr(C)]
 enum AstNodeKind {
     OpCreateTable,
     OpInsert,

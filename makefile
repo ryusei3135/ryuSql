@@ -13,7 +13,7 @@ SCRIPT_DIR := $(ROOT_DIR)/scripts
 BUILD_DIR := $(ROOT_DIR)/build
 
 # ==== パス ====
-ENUM_SRC := $(SETTINGS_DIR)/ast_enum.yaml
+STRUCT_SRC := $(SETTINGS_DIR)/rust_c_structs.yaml
 CPP_ENUM := $(INCLUDE_DIR)/ast_node.hpp
 CPP_TOKEN := $(INCLUDE_DIR)/token.hpp
 RUST_ENUM := $(RUST_DIR)/ast_node.rs
@@ -43,8 +43,8 @@ all: gen $(TARGET)
 # enum生成
 gen: $(CPP_ENUM) $(RUST_ENUM)
 
-$(ARGV): $(ENUM_SRC) $(GEN_SCRIPT) $(ARGV)
-	$(PYTHON) $(GEN_SCRIPT) $(ENUM_SRC) $(ARGV)
+$(ARGV): $(STRUCT_SRC) $(GEN_SCRIPT) $(ARGV)
+	$(PYTHON) $(GEN_SCRIPT) $(STRUCT_SRC) $(ARGV)
 
 # C++
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(CPP_ENUM)

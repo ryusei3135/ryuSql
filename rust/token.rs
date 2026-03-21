@@ -1,5 +1,6 @@
 
 
+#[repr(C)]
 enum TokenKind {
     FROM,
     TABLE,
@@ -16,4 +17,12 @@ enum TokenKind {
     Semicolon,
     ColumnType,
     Null,
+} 
+
+
+
+#[repr(C)]
+struct Token {
+    value String,
+    token_kind TokenKind,
 } 

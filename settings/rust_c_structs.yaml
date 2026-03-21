@@ -11,7 +11,7 @@ token_struct: Token
 token_member:
   -
     - value
-    - string
+    - String
   - 
     - token_kind
     - TokenKind

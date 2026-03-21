@@ -12,6 +12,7 @@
 #include <optional>
 
 #include "error.hpp"
+#include "token.hpp"
 
 enum class CharKinds {
     Letter,
@@ -20,29 +21,6 @@ enum class CharKinds {
     Symbol,
     Other,
     NONE,
-};
-
-enum class TokenKind {
-    FROM,
-    TABLE,
-    SELECT,
-    CREATE,
-    STRING,
-    NUMBER,
-    INSERT,
-    INTO,
-    VALUES,
-    LeftParen,
-    RightParen,
-    Comma,
-    Semicolon,
-    ColumnType,
-    Null,
-};
-
-struct Token {
-    std::string value;
-    TokenKind token_kind;
 };
 
 // テーブルの初期化
