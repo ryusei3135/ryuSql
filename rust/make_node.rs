@@ -3,10 +3,11 @@ mod token;
 
 #[no_mangle]
 pub extern "C" fn create_table_node(
-    tokens: *const token::Token,
-    len: usize
+    tokens_data: *const token::Token,
+    len: usize,
+    count: *mut usize
 ) {
-    let slice = unsafe { std::slice::from_raw_parts(tokens, len) };
+    let slice = unsafe { std::slice::from_raw_parts(tokens_data, len) };
 
     for x in slice {
         println!("{}", x);

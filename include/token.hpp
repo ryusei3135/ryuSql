@@ -1,7 +1,3 @@
-#pragma once
-
-#include <string>
-
 enum class TokenKind {
     FROM,
     TABLE,
@@ -19,8 +15,9 @@ enum class TokenKind {
     ColumnType,
     Null,
 };
-
 struct Token {
-    std::string value;
-    TokenKind token_kind;
+    std::string  value;
+
+    TokenKind  token_kind;
+
 };

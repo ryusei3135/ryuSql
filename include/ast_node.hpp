@@ -1,5 +1,3 @@
-#pragma once
-
 enum class AstNodeKind {
     OpCreateTable,
     OpInsert,
