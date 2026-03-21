@@ -6,3 +6,29 @@ member_names:
   - ColumnName
   - ColumnType
   - TableName
+
+token_struct: Token
+token_member:
+  -
+    - value
+    - string
+  - 
+    - token_kind
+    - TokenKind
+token_kind: TokenKind
+token_kind_member:
+  - FROM
+  - TABLE
+  - SELECT
+  - CREATE
+  - STRING
+  - NUMBER
+  - INSERT
+  - INTO
+  - VALUES
+  - LeftParen
+  - RightParen
+  - Comma
+  - Semicolon
+  - ColumnType
+  - "Null"

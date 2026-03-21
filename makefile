@@ -15,9 +15,13 @@ BUILD_DIR := $(ROOT_DIR)/build
 # ==== パス ====
 ENUM_SRC := $(SETTINGS_DIR)/ast_enum.yaml
 CPP_ENUM := $(INCLUDE_DIR)/ast_node.hpp
+CPP_TOKEN := $(INCLUDE_DIR)/token.hpp
 RUST_ENUM := $(RUST_DIR)/ast_node.rs
+RUST_TOKEN := $(RUST_DIR)/token.rs
 
-GEN_SCRIPT := $(SCRIPT_DIR)/generate_ast.py
+ARGV := $(CPP_ENUM) $(RUST_ENUM) $(CPP_TOKEN) $(RUST_TOKEN)
+
+GEN_SCRIPT := $(SCRIPT_DIR)/generate_structs.py
 
 # ==== オプション ====
 CXXFLAGS := -O2 -std=c++23 -I$(INCLUDE_DIR)
@@ -39,8 +43,8 @@ all: gen $(TARGET)
 # enum生成
 gen: $(CPP_ENUM) $(RUST_ENUM)
 
-$(CPP_ENUM) $(RUST_ENUM): $(ENUM_SRC) $(GEN_SCRIPT) $(CPP_ENUM) $(RUST_ENUM)
-	$(PYTHON) $(GEN_SCRIPT) $(ENUM_SRC) $(CPP_ENUM) $(RUST_ENUM)
+$(ARGV): $(ENUM_SRC) $(GEN_SCRIPT) $(ARGV)
+	$(PYTHON) $(GEN_SCRIPT) $(ENUM_SRC) $(ARGV)
 
 # C++
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(CPP_ENUM)
