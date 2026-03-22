@@ -1,5 +1,4 @@
 #include "analy.hpp"
-#include "debug.hpp"
 #include "char_table.tpp"
 
 
@@ -25,10 +24,10 @@ class Stack {
 public:
     std::vector<Token> tokens;
 
-    auto stack_char(
+    std::optional<Errors> stack_char(
         const char chr, 
         const Analy::CharKinds kind
-    ) -> std::optional<Errors> {
+    ) {
         const ReturnTokenKind result = categorize_token_kind(value, last_kind);
         if (!result.has_value()) {
             last_kind = kind;
@@ -164,11 +163,11 @@ std::expected<std::vector<Token>, Errors>
 Analy::input_sql_query(const char* ascii_sql_query) {
     Stack token_stack = {};
     size_t size = strlen(ascii_sql_query);
+    size_t query_ptr = 0;
     uint8_t loop_count = 8;
-    const std::array<Analy::CharKinds, 256> char_table
-        = Table::init_char_table<Analy::CharKinds>();
+    const std::array<CharKinds, 256> char_table = Table::init_char_table<CharKinds>();
 
-    for (size_t query_ptr = 0; query_ptr < size; query_ptr++) {
+    while (query_ptr < size) {
         size_t chunk
             = query_ptr + 8 > size
             ? load::load64_safe(
@@ -178,16 +177,11 @@ Analy::input_sql_query(const char* ascii_sql_query) {
 
         for(int i = 0;i < loop_count; i++) {
             uint8_t c = (chunk >> (i*8)) & 0xff;
-            if (auto err = token_stack.stack_char(c, char_table[c])) {
-                #ifdef DEBUG // 現在このスタックが無効である
-                std::cerr
-                    << "[lexer:err]: invalid stack; "
-                    << "[func:input_sql_query]"
-                    << std::endl;
-                #endif
+            if (auto err = token_stack.stack_char(c, char_table[c]))
                 return std::unexpected(err.value());
-            }
         }
+
+        query_ptr += loop_count;
     }
 
     token_stack.exit();

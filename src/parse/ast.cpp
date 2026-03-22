@@ -9,7 +9,13 @@ Parser::create_ast_node(const std::vector<Token>& tokens) {
     for (size_t pos = 0; pos < tokens.size(); pos++) {
         switch (tokens[pos].token_kind) {
             case TokenKind::CREATE: {
-                Parser::create_CREATE_TABLE_node(tokens, &pos);
+                auto result = Parser::create_CREATE_TABLE_node(tokens, &pos);
+                if (result.has_value()) {
+                    auto value = result.value();
+                    ast.insert(ast.end(), value.begin(), value.end());
+                } else {
+                    return std::unexpected(result.error());
+                }
                 break;
             }
             case TokenKind::INSERT: {
@@ -23,5 +29,6 @@ Parser::create_ast_node(const std::vector<Token>& tokens) {
             }
         }
     }
+
     return ast;
 }

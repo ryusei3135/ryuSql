@@ -10,15 +10,15 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        // auto result = create_ast(tokens.value());
-        // if (!result.has_value()) {
-        //     std::cout << (int)result.error() << ":[err]ast" << std::endl;
-        //     return 1;
-        // }
+        auto result = Parser::create_ast_node(tokens.value());
+        if (!result.has_value()) {
+            std::cout << (int)result.error() << ":[err]ast" << std::endl;
+            return 1;
+        }
 
-        // for (auto n: result.value()) {
-        //     std::cout << n.value << std::endl;
-        // }
+        for (auto n: result.value()) {
+            std::cout << n.value << std::endl;
+        }
     }
 
     return 0;

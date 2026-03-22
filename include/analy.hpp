@@ -17,6 +17,9 @@
 
 using ReturnTokenKind = std::expected<std::optional<TokenKind>, Errors>;
 
+
+#define DEBUG true
+
 namespace Analy {
     enum class CharKinds {
         Letter,

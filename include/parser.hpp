@@ -25,10 +25,14 @@ namespace Parser {
         std::vector<Token> tokens;
     };
 
+    // paren_node.cpp
+    std::optional<std::vector<Ast>> create_paren_node(
+        const std::vector<Token>& tokens, 
+        size_t* pos
+    );
     // expr/create_table.cpp
     std::expected<std::vector<Ast>, Errors> 
     create_CREATE_TABLE_node(const std::vector<Token>& tokens, size_t* pos);
-
     // ast.cpp
     std::expected<std::vector<Ast>, Errors>
     create_ast_node(const std::vector<Token>& tokens);
