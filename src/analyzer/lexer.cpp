@@ -1,6 +1,17 @@
 #include "analy.hpp"
 #include "debug.hpp"
+#include "char_table.tpp"
 
+
+
+Ast Analy::AstMake::Make(const size_t value, const AstNodeKind K) {
+    return Ast {
+        .value = value,
+        .kind = K,
+        .left = 0,
+        .right = 0
+    };
+}
 
 constexpr uint32_t hash(std::string target) {
     uint32_t h = 0;
@@ -16,7 +27,7 @@ public:
 
     auto stack_char(
         const char chr, 
-        const CharKinds kind
+        const Analy::CharKinds kind
     ) -> std::optional<Errors> {
         const ReturnTokenKind result = categorize_token_kind(value, last_kind);
         if (!result.has_value()) {
@@ -29,7 +40,7 @@ public:
             value.clear();
         }
 
-        if (kind != CharKinds::Space)
+        if (kind != Analy::CharKinds::Space)
             value.push_back(chr);
         this->last_kind = kind;
         return std::nullopt;
@@ -50,31 +61,31 @@ public:
     }
 private:
     std::string value;
-    CharKinds last_kind = CharKinds::NONE;
+    Analy::CharKinds last_kind = Analy::CharKinds::NONE;
     char last_char = '\0';
     
     inline bool check_stackable(
-        const CharKinds kind
+        const Analy::CharKinds kind
     ) {
         return 
             (value.length()
             && last_kind != kind
-            && (kind != CharKinds::Symbol || last_kind != CharKinds::Symbol)
-            && last_kind != CharKinds::NONE
-            && last_kind != CharKinds::Space)
-            || kind == CharKinds::Symbol && last_kind == kind;
+            && (kind != Analy::CharKinds::Symbol || last_kind != Analy::CharKinds::Symbol)
+            && last_kind != Analy::CharKinds::NONE
+            && last_kind != Analy::CharKinds::Space)
+            || (kind == Analy::CharKinds::Symbol && last_kind == kind);
     }
 
     inline ReturnTokenKind categorize_token_kind(
         const std::string& token, 
-        const CharKinds kind
+        const Analy::CharKinds kind
     ) {
         switch (kind) {
-            case CharKinds::Digit: return TokenKind::NUMBER;
-            case CharKinds::Symbol: {
+            case Analy::CharKinds::Digit: return TokenKind::NUMBER;
+            case Analy::CharKinds::Symbol: {
                 if (token.length() == 1) {
                     const TokenKind token_kind
-                        = init_char_table<TokenKind>()[token[0]];
+                        = Table::init_char_table<TokenKind>()[token[0]];
                     if (token_kind != TokenKind::Null) {
                         return token_kind;
                     } else {
@@ -96,7 +107,7 @@ private:
                     return std::unexpected(Errors::InvalidString);
                 }
             }
-            case CharKinds::Letter: {
+            case Analy::CharKinds::Letter: {
                 switch (hash(token)) {
                     case hash("INT"):
                         return TokenKind::ColumnType;
@@ -119,9 +130,9 @@ private:
                 }
                 return TokenKind::STRING;
             }
-            case CharKinds::Space: 
+            case Analy::CharKinds::Space: 
                 return std::nullopt;
-            case CharKinds::NONE:
+            case Analy::CharKinds::NONE:
                 return std::nullopt;
             default: {
                 #ifdef DEBUG
@@ -150,11 +161,12 @@ namespace load {
 }
 
 std::expected<std::vector<Token>, Errors>
-input_sql_query(const char* ascii_sql_query) {
+Analy::input_sql_query(const char* ascii_sql_query) {
     Stack token_stack = {};
     size_t size = strlen(ascii_sql_query);
     uint8_t loop_count = 8;
-    const std::array<CharKinds, 256> char_table = init_char_table<CharKinds>();
+    const std::array<Analy::CharKinds, 256> char_table
+        = Table::init_char_table<Analy::CharKinds>();
 
     for (size_t query_ptr = 0; query_ptr < size; query_ptr++) {
         size_t chunk

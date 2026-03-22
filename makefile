@@ -26,10 +26,11 @@ GENERATE_DATA := $(CPP_ENUM) $(RUST_ENUM) $(TOKEN_CPP) $(TOKEN_RUST)
 RUST_LIB := $(RUST_DIR)/target/release/librustlib.a
 
 # ==== C++ ====
-CXXFLAGS := -O2 -std=c++23 -I$(INCLUDE_DIR)
+CXXFLAGS := -Wall -Wextra -O2 -std=c++23 -MMD -MP -I$(INCLUDE_DIR)
 
 CPP_SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
 CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(CPP_SRCS))
+DEPS     = $(CPP_OBJS:.o=.d)
 
 TARGET := db
 
@@ -57,7 +58,9 @@ $(TARGET): $(CPP_OBJS) $(RUST_LIB)
 	    -L$(RUST_DIR)/target/release -lrustlib \
 	    -lpthread -ldl
 
+-include $(DEPS)
+
 # ==== クリーン ====
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
-	$(CARGO) clean --manifest-path $(RUST_DIR)/Cargo.toml
+	$(CARGO) clean --manifest-path $(RUST_DIR)/Cargo.toml $(DEPS)

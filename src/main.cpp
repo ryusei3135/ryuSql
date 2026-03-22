@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]) {
     if (argc > 1) {
-        auto tokens = input_sql_query(argv[1]);
+        auto tokens = Analy::input_sql_query(argv[1]);
         if (!tokens.has_value()) {
             std::cout << (int)tokens.error() << ":[err]token" << std::endl;
             return 1;
