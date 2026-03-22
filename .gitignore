@@ -1,3 +1,5 @@
 .vscode/
 build/
+rust/target/
+rust/Cargo.lock
 commit.sh

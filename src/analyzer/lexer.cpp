@@ -18,7 +18,7 @@ public:
         const char chr, 
         const CharKinds kind
     ) -> std::optional<Errors> {
-        auto result = categorize_token_kind(value, last_kind);
+        const ReturnTokenKind result = categorize_token_kind(value, last_kind);
         if (!result.has_value()) {
             last_kind = kind;
             return result.error();
@@ -36,7 +36,7 @@ public:
     }
     
     std::optional<Errors> exit() {
-        auto result = categorize_token_kind(value, last_kind);
+        const ReturnTokenKind result = categorize_token_kind(value, last_kind);
         if (!result.has_value())
             return result.error();
         if (!result.value().has_value())// 空白は無視する
@@ -65,10 +65,10 @@ private:
             || kind == CharKinds::Symbol && last_kind == kind;
     }
 
-    inline auto categorize_token_kind(
+    inline ReturnTokenKind categorize_token_kind(
         const std::string& token, 
         const CharKinds kind
-    ) -> std::expected<std::optional<TokenKind>, Errors> {
+    ) {
         switch (kind) {
             case CharKinds::Digit: return TokenKind::NUMBER;
             case CharKinds::Symbol: {
@@ -149,16 +149,14 @@ namespace load {
     }
 }
 
-auto input_sql_query(
-    const char* ascii_sql_query
-) -> std::expected<std::vector<Token>, Errors> {
+std::expected<std::vector<Token>, Errors>
+input_sql_query(const char* ascii_sql_query) {
     Stack token_stack = {};
     size_t size = strlen(ascii_sql_query);
-    size_t query_ptr = 0;
     uint8_t loop_count = 8;
     const std::array<CharKinds, 256> char_table = init_char_table<CharKinds>();
 
-    while (query_ptr < size) {
+    for (size_t query_ptr = 0; query_ptr < size; query_ptr++) {
         size_t chunk
             = query_ptr + 8 > size
             ? load::load64_safe(
@@ -178,10 +176,8 @@ auto input_sql_query(
                 return std::unexpected(err.value());
             }
         }
-
-        query_ptr += loop_count;
     }
 
     token_stack.exit();
-    return token_stack.tokens;
+    return token_stack.tokens; 
 }

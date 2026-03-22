@@ -1,5 +1,5 @@
 #[repr(C)]
-enum TokenKind {
+pub enum TokenKind {
     FROM,
     TABLE,
     SELECT,
@@ -17,9 +17,7 @@ enum TokenKind {
     Null,
 }
 #[repr(C)]
-struct Token {
+pub struct Token {
     value : String,
-
     token_kind : TokenKind,
-
 }

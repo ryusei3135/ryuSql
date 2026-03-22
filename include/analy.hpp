@@ -14,6 +14,9 @@
 #include "error.hpp"
 #include "token.hpp"
 
+
+using ReturnTokenKind = std::expected<std::optional<TokenKind>, Errors>;
+
 enum class CharKinds {
     Letter,
     Digit,
@@ -61,6 +64,5 @@ consteval const std::array<T, 256> init_char_table() {
 }
 
 // lexer.cpp
-auto input_sql_query(
-    const char* ascii_sql_query
-) -> std::expected<std::vector<Token>, Errors>;
+std::expected<std::vector<Token>, Errors>
+input_sql_query(const char* ascii_sql_query);

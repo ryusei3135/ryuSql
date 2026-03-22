@@ -1,7 +1,7 @@
-# ==== コンパイラ/インタプリタ ====
+# ==== コンパイラ ====
 CXX := g++
-RUSTC := rustc
 PYTHON := python3
+CARGO := cargo
 
 # ===== ディレクトリ =====
 ROOT_DIR := .
@@ -12,54 +12,52 @@ SETTINGS_DIR := $(ROOT_DIR)/settings
 SCRIPT_DIR := $(ROOT_DIR)/scripts
 BUILD_DIR := $(ROOT_DIR)/build
 
-# ==== パス ====
-STRUCT_SRC := $(SETTINGS_DIR)/rust_c_structs.yaml
-CPP_ENUM := $(INCLUDE_DIR)/ast_node.hpp
-CPP_TOKEN := $(INCLUDE_DIR)/token.hpp
-RUST_ENUM := $(RUST_DIR)/ast_node.rs
-RUST_TOKEN := $(RUST_DIR)/token.rs
-
-ARGV := $(CPP_ENUM) $(RUST_ENUM) $(CPP_TOKEN) $(RUST_TOKEN)
-
+# ==== enum生成 ====
+ENUM_SRC := $(SETTINGS_DIR)/rust_c_structs.yaml
 GEN_SCRIPT := $(SCRIPT_DIR)/generate_structs.py
+CPP_ENUM := $(INCLUDE_DIR)/ast_node.hpp
+RUST_ENUM := $(RUST_DIR)/src/ast_node.rs
+TOKEN_CPP := $(INCLUDE_DIR)/token.hpp
+TOKEN_RUST := $(RUST_DIR)/src/token.rs
 
-# ==== オプション ====
+GENERATE_DATA := $(CPP_ENUM) $(RUST_ENUM) $(TOKEN_CPP) $(TOKEN_RUST)
+
+# ==== Rust ====
+RUST_LIB := $(RUST_DIR)/target/release/librustlib.a
+
+# ==== C++ ====
 CXXFLAGS := -O2 -std=c++23 -I$(INCLUDE_DIR)
-RUSTFLAGS := --crate-type=staticlib -O
 
-# ==== ソース ====
 CPP_SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
 CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(CPP_SRCS))
 
-# Rustは1つのライブラリとしてまとめる
-RUST_LIB := $(BUILD_DIR)/librust.a
-
-# ==== ターゲット ====
 TARGET := db
 
 # ==== ビルド ====
 all: gen $(TARGET)
 
 # enum生成
-gen: $(CPP_ENUM) $(RUST_ENUM)
+gen: $(GENERATE_DATA)
 
-$(ARGV): $(STRUCT_SRC) $(GEN_SCRIPT) $(ARGV)
-	$(PYTHON) $(GEN_SCRIPT) $(STRUCT_SRC) $(ARGV)
+$(GENERATE_DATA): $(ENUM_SRC) $(GEN_SCRIPT)
+	$(PYTHON) $(GEN_SCRIPT) $(ENUM_SRC) $(GENERATE_DATA)
 
 # C++
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(CPP_ENUM)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Rust（まとめて1回ビルド）
+# Rust
 $(RUST_LIB): $(RUST_ENUM)
-	@mkdir -p $(BUILD_DIR)
-	$(RUSTC) $(RUSTFLAGS) $< -o $@
+	$(CARGO) build --release --manifest-path $(RUST_DIR)/Cargo.toml
 
 # リンク
 $(TARGET): $(CPP_OBJS) $(RUST_LIB)
-	$(CXX) $^ -o $@
+	$(CXX) $^ -o $@ \
+	    -L$(RUST_DIR)/target/release -lrustlib \
+	    -lpthread -ldl
 
 # ==== クリーン ====
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
+	$(CARGO) clean --manifest-path $(RUST_DIR)/Cargo.toml

@@ -1,5 +1,13 @@
-ast: Ast
-ast_member:
+GenerateList:
+  -
+    - ast_enum
+    - ast_struct
+  - 
+    - token_enum
+    - token_struct
+
+ast_struct: Ast
+ast_struct_member:
   -
     - value
     - usize
@@ -13,8 +21,8 @@ ast_member:
     - right
     - usize
 
-ast_kind: AstNodeKind
-ast_kind_member:
+ast_enum: AstNodeKind
+ast_enum_member:
   - OpCreateTable
   - OpInsert
   - OpSelect
@@ -22,16 +30,8 @@ ast_kind_member:
   - ColumnType
   - TableName
 
-token_struct: Token
-token_struct_member:
-  -
-    - value
-    - String
-  - 
-    - token_kind
-    - TokenKind
-token_kind: TokenKind
-token_kind_member:
+token_enum: TokenKind
+token_enum_member:
   - FROM
   - TABLE
   - SELECT
@@ -47,3 +47,12 @@ token_kind_member:
   - Semicolon
   - ColumnType
   - "Null"
+
+token_struct: Token
+token_struct_member:
+  -
+    - value
+    - String
+  - 
+    - token_kind
+    - TokenKind
