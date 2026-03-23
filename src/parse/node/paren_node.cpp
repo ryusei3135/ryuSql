@@ -15,11 +15,12 @@ std::optional<std::vector<Ast>> Parser::create_paren_node(
             ast.push_back(r.value());
         if (auto r = match.expect(TokenKind::ColumnType, AstNodeKind::ColumnType, &i))
             ast.push_back(r.value());
-        if (match.consume(TokenKind::Comma, &i)) continue;
+        if (match.consume(TokenKind::Comma, &i))
+            continue;
 
         if (match.consume(TokenKind::RightParen, &i)) {
             *pos = i;
-            break;
+            return ast;
         }
 
         return std::nullopt;

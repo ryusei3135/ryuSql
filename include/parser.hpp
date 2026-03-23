@@ -4,8 +4,10 @@
 #include "analy.hpp"
 #include "error.hpp"
 #include "ast_node.hpp"
+#include "RyuSql.hpp"
 
 #include "paren_node.tpp"
+
 
 namespace Parser {
     class Match {

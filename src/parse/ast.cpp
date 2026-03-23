@@ -10,12 +10,9 @@ Parser::create_ast_node(const std::vector<Token>& tokens) {
         switch (tokens[pos].token_kind) {
             case TokenKind::CREATE: {
                 auto result = Parser::create_CREATE_TABLE_node(tokens, &pos);
-                if (result.has_value()) {
-                    auto value = result.value();
-                    ast.insert(ast.end(), value.begin(), value.end());
-                } else {
-                    return std::unexpected(result.error());
-                }
+                ErrTry(result);
+                auto value = result.value();
+                ast.insert(ast.end(), value.begin(), value.end());
                 break;
             }
             case TokenKind::INSERT: {

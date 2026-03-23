@@ -1,24 +1,13 @@
 #pragma once
 
-#include <string>
-#include <iostream>
-#include <cstdint>
-#include <vector>
-#include <array>
-#include <concepts>
-#include <utility>
-#include <cstring>
-#include <expected>
-#include <optional>
 
 #include "error.hpp"
 #include "token.hpp"
 #include "ast_node.hpp"
+#include "RyuSql.hpp"
 
 using ReturnTokenKind = std::expected<std::optional<TokenKind>, Errors>;
 
-
-#define DEBUG true
 
 namespace Analy {
     enum class CharKinds {

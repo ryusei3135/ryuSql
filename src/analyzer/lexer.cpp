@@ -1,6 +1,6 @@
 #include "analy.hpp"
 #include "char_table.tpp"
-
+#include "RyuSql.hpp"
 
 
 Ast Analy::AstMake::Make(const size_t value, const AstNodeKind K) {
@@ -44,7 +44,7 @@ public:
         this->last_kind = kind;
         return std::nullopt;
     }
-    
+
     std::optional<Errors> exit() {
         const ReturnTokenKind result = categorize_token_kind(value, last_kind);
         if (!result.has_value())
@@ -177,13 +177,12 @@ Analy::input_sql_query(const char* ascii_sql_query) {
 
         for(int i = 0;i < loop_count; i++) {
             uint8_t c = (chunk >> (i*8)) & 0xff;
-            if (auto err = token_stack.stack_char(c, char_table[c]))
-                return std::unexpected(err.value());
+            ErrTry(token_stack.stack_char(c, char_table[c]));
         }
 
         query_ptr += loop_count;
     }
 
-    token_stack.exit();
+    ErrTry(token_stack.exit());
     return token_stack.tokens; 
 }

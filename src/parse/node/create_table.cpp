@@ -19,7 +19,7 @@ std::expected<std::vector<Ast>, Errors> Parser::create_CREATE_TABLE_node(
     std::cout << tokens[*pos].value << std::endl;
     if (!match.consume(TokenKind::TABLE, pos)) {
         #ifdef DEBUG
-        std::cerr << "[node:err]: unmatch token (TABLE)" << std::endl;
+        std::cerr << "[node:err]: unmatch token (TABLE)" << tokens[*pos].value << std::endl;
         #endif
         return std::unexpected(Errors::UnexpectTokenKind);
     }
