@@ -1,7 +1,17 @@
 #include "analy.hpp"
 #include "parser.hpp"
 
+// # ===== RyuSql.hpp ===== #
+Ast AstNodeMaker::Make(const size_t value, const AstNodeKind K) {
+    return Ast {
+        .value = value,
+        .kind = K,
+        .left = 0,
+        .right = 0
+    };
+}
 
+// # ===== main.cpp ===== #
 int main(int argc, char *argv[]) {
     if (argc > 1) {
         auto tokens = Analy::input_sql_query(argv[1]);

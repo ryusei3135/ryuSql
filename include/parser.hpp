@@ -6,31 +6,18 @@
 #include "ast_node.hpp"
 #include "RyuSql.hpp"
 
-#include "paren_node.tpp"
-
+#include "checks.tpp"
 
 namespace Parser {
-    class Match {
-    public:
-        Match(
-            const std::vector<Token>& ref_tokens
-        ) : tokens(ref_tokens) {}
-
-        bool consume(const TokenKind kind, size_t* i);
-
-        std::optional<Ast> expect(
-            const TokenKind kind, 
-            const AstNodeKind node_kind, 
-            size_t* pos
-        );
-    private:
-        std::vector<Token> tokens;
+    // astのノードの親子関係を構築
+    namespace Linker {
+        Opt::ErrOpt ast_link(Ast& ast, const size_t left, const size_t right);
     };
-
     // paren_node.cpp
-    std::optional<std::vector<Ast>> create_paren_node(
+    std::expected<std::vector<Ast>, Errors> create_paren_node(
         const std::vector<Token>& tokens, 
-        size_t* pos
+        size_t* pos,
+        const size_t parent_id
     );
     // expr/create_table.cpp
     std::expected<std::vector<Ast>, Errors> 

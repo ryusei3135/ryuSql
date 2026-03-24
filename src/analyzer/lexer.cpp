@@ -3,15 +3,6 @@
 #include "RyuSql.hpp"
 
 
-Ast Analy::AstMake::Make(const size_t value, const AstNodeKind K) {
-    return Ast {
-        .value = value,
-        .kind = K,
-        .left = 0,
-        .right = 0
-    };
-}
-
 constexpr uint32_t hash(std::string target) {
     uint32_t h = 0;
     for (char c : target) {
@@ -24,7 +15,7 @@ class Stack {
 public:
     std::vector<Token> tokens;
 
-    std::optional<Errors> stack_char(
+    Opt::ErrOpt stack_char(
         const char chr, 
         const Analy::CharKinds kind
     ) {
@@ -45,7 +36,7 @@ public:
         return std::nullopt;
     }
 
-    std::optional<Errors> exit() {
+    Opt::ErrOpt exit() {
         const ReturnTokenKind result = categorize_token_kind(value, last_kind);
         if (!result.has_value())
             return result.error();

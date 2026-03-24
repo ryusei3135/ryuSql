@@ -2,6 +2,18 @@
 #include "ast_node.hpp"
 
 
+Opt::ErrOpt Parser::Linker::ast_link(
+    Ast& ast, 
+    const size_t left, 
+    const size_t right
+) {
+    if (!ast.left || !ast.right) 
+        return Errors::NodeHasAlreadyAssigned;
+    ast.right = right;
+    ast.left = left;
+    return std::nullopt;
+}
+
 std::expected<std::vector<Ast>, Errors>
 Parser::create_ast_node(const std::vector<Token>& tokens) {
     std::vector<Ast> ast;

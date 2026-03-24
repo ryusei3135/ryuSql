@@ -18,6 +18,10 @@
 
 #define DEBUG true
 
+namespace Opt {
+    using ErrOpt = std::optional<Errors>;
+};
+
 namespace _local {
     template<typename T>
     struct is_expected : std::false_type {};
@@ -40,7 +44,7 @@ namespace _local {
 
     // expectedやoptionalがエラーの場合エラーだけ取り出す
     template<typename T>
-    inline std::optional<Errors> _is_err(const T result) {
+    inline Opt::ErrOpt _is_err(const T result) {
         if constexpr (_local::is_expected_v<T>) {
             if (!result.has_value())
                 return result.error();
@@ -59,7 +63,13 @@ namespace _local {
 
 #define ErrTry(result)\
     using result_type = std::decay_t<decltype((result))>;\
-    if (std::optional<Errors> err \
+    if (Opt::ErrOpt err \
         = _local::_is_err<result_type>((result))) {\
         return std::unexpected(err.value());\
     }
+
+// # ===== main.cpp ===== #
+// astのノードを作成する
+namespace AstNodeMaker {
+    Ast Make(const size_t value, const AstNodeKind K);
+};

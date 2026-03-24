@@ -19,10 +19,6 @@ namespace Analy {
         NONE,
     };
 
-    namespace AstMake {
-        Ast Make(const size_t value, const AstNodeKind K);
-    };
-
     // lexer.cpp
     std::expected<std::vector<Token>, Errors>
     input_sql_query(const char* ascii_sql_query);
