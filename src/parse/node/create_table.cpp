@@ -2,22 +2,22 @@
 #include "ast_node.hpp"
 
 
-std::expected<std::vector<Ast>, Errors> Parser::create_CREATE_TABLE_node(
+std::expected<AstNode, Errors> Parser::create_CREATE_TABLE_node(
     const std::vector<Token>& tokens,
     size_t* pos
 ) {
-    Parser::NodeEmitter emitter(tokens);
-    std::vector<Ast> ast;
-    // テーブルの名前が来ない場合例外を返すので、optionalにする必要はない
-    size_t parent_id;
+    Parser::TokenKindMatcher emitter(tokens);
+    AstNode ast;
+    ast.push_back(Parser::Node::make_header());
 
     ErrTry(emitter.compare_kind<TokenKind::CREATE>(pos));
     ErrTry(emitter.compare_kind<TokenKind::TABLE>(pos));
+    ast.push_back(Parser::Node::maker<AstNodeKind::OpCreateTable>
+        (0, std::nullopt));
 
     if (auto result = emitter.expect_kind<TokenKind::STRING>(
-        AstNodeKind::OpCreateTable, pos
+        AstNodeKind::TableName, pos
     )) {
-        parent_id = ast.size();
         ast.push_back(result.value());
     } else {
         #ifdef DEBUG
@@ -27,8 +27,9 @@ std::expected<std::vector<Ast>, Errors> Parser::create_CREATE_TABLE_node(
     }
 
     ErrTry(emitter.compare_kind<TokenKind::LeftParen>(pos));
-    if (auto result = Parser::create_paren_node(tokens, pos, parent_id)) {
-        std::vector<Ast> paren_node = result.value();
+    if (auto result = Parser::create_paren_node(tokens, pos)) {
+        ast[1].right = ast.size();
+        AstNode paren_node = result.value();
         ast.insert(ast.end(), paren_node.begin(), paren_node.end());
         return ast;
     } else {

@@ -3,11 +3,14 @@
 #include <string>
 
 enum class AstNodeKind {
+    Header,
     OpCreateTable,
     OpInsert,
     OpSelect,
+    Column,
     ColumnName,
     ColumnType,
+    ColumnNext,
     TableName,
 };
 struct Ast {

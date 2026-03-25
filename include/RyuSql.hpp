@@ -61,15 +61,9 @@ namespace _local {
     }
 };
 
+// 呼び出す関数の戻り値がexpected<..., Errors>でなければいけない
 #define ErrTry(result)\
     using result_type = std::decay_t<decltype((result))>;\
-    if (Opt::ErrOpt err \
-        = _local::_is_err<result_type>((result))) {\
+    if (Opt::ErrOpt err = _local::_is_err<result_type>((result))) {\
         return std::unexpected(err.value());\
     }
-
-// # ===== main.cpp ===== #
-// astのノードを作成する
-namespace AstNodeMaker {
-    Ast Make(const size_t value, const AstNodeKind K);
-};

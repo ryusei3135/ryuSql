@@ -1,29 +1,23 @@
 #include "parser.hpp"
 
 // パーレンのトークンを処理する
-std::expected<std::vector<Ast>, Errors> Parser::create_paren_node(
-    const std::vector<Token>& tokens, 
-    size_t* pos,
-    const size_t parent_id
+std::expected<AstNode, Errors> Parser::create_paren_node(
+    const std::vector<Token>& tokens,
+    size_t* pos
 ) {
-    Parser::NodeEmitter emitter(tokens);
-    std::vector<Ast> ast;
-    size_t name_id = 0;
-    size_t type_id = 0;
+    Parser::TokenKindMatcher emitter(tokens);
+    AstNode ast;
+    ast.push_back(
+        Parser::Node::maker<AstNodeKind::ColumnNext>(0, std::nullopt));
 
     for (size_t i = *pos; i < tokens.size(); i++) {
-        auto r = emitter.expect_kind<TokenKind::STRING>(AstNodeKind::ColumnName, &i);
+        size_t name = i;
+        ErrTry(emitter.compare_kind<TokenKind::STRING>(&i));
+        size_t type = i;
+        ErrTry(emitter.compare_kind<TokenKind::ColumnType>(&i));
 
-        if (r.has_value()) // 最初は名前]
-            name_id = parent_id + 1; // カラムの名前のidはテーブルの名前の次
-            ast.push_back(r.value());
-        if (auto r = emitter.expect_kind<TokenKind::ColumnType>(
-            AstNodeKind::ColumnType, 
-        &i)) {
-            //
-            type_id = parent_id + 2;
-            ast.push_back(r.value());
-        }
+        Parser::Node::make_column_node(ast, name, type);
+
         if (!emitter.compare_kind<TokenKind::Comma>(&i)) {
             continue;
         }

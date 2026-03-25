@@ -23,11 +23,14 @@ ast_struct_member:
 
 ast_enum: AstNodeKind
 ast_enum_member:
+  - Header
   - OpCreateTable
   - OpInsert
   - OpSelect
+  - Column
   - ColumnName
   - ColumnType
+  - ColumnNext
   - TableName
 
 token_enum: TokenKind
