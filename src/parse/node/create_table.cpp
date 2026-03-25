@@ -8,12 +8,11 @@ std::expected<AstNode, Errors> Parser::create_CREATE_TABLE_node(
 ) {
     Parser::TokenKindMatcher emitter(tokens);
     AstNode ast;
-    ast.push_back(Parser::Node::make_header());
+    ast.push_back(Parser::Node::make_null<AstNodeKind::Header>());
 
     ErrTry(emitter.compare_kind<TokenKind::CREATE>(pos));
     ErrTry(emitter.compare_kind<TokenKind::TABLE>(pos));
-    ast.push_back(Parser::Node::maker<AstNodeKind::OpCreateTable>
-        (0, std::nullopt));
+    ast.push_back(Parser::Node::make_null<AstNodeKind::OpCreateTable>());
 
     if (auto result = emitter.expect_kind<TokenKind::STRING>(
         AstNodeKind::TableName, pos

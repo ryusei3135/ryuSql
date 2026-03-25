@@ -7,8 +7,7 @@ std::expected<AstNode, Errors> Parser::create_paren_node(
 ) {
     Parser::TokenKindMatcher emitter(tokens);
     AstNode ast;
-    ast.push_back(
-        Parser::Node::maker<AstNodeKind::ColumnNext>(0, std::nullopt));
+    ast.push_back(Parser::Node::make_null<AstNodeKind::ColumnNext>());
 
     for (size_t i = *pos; i < tokens.size(); i++) {
         size_t name = i;

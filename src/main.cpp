@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
         }
 
         for (auto n: result.value()) {
-            std::cout << n.value << std::endl;
+            std::cout << tokens.value()[n.value].value << std::endl;
         }
     }
 

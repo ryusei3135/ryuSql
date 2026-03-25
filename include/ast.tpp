@@ -28,20 +28,15 @@ namespace Parser::Node {
             .right = id_or_zero(Child::Right)
         };
     }
+
+    template<AstNodeKind T> Ast make_null() {
+        return maker<T>(0, std::nullopt);
+    }
     
     inline Ast maker_target_kind(const size_t value, const AstNodeKind kind) {
         return Ast {
             .value = value,
             .kind = kind,
-            .left = 0,
-            .right = 0
-        };
-    }
-    // ノードのヘッダ
-    inline Ast make_header() {
-        return Ast {
-            .value = 0,
-            .kind = AstNodeKind::Header,
             .left = 0,
             .right = 0
         };

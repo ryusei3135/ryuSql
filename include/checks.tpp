@@ -28,7 +28,7 @@ namespace Parser {
         inline std::expected<Ast, Errors>
         expect_kind(const AstNodeKind kind, size_t* value) const {
             if (!compare_kind<K>(value))
-                return Parser::Node::maker_target_kind(*value, kind);
+                return Parser::Node::maker_target_kind((*value) - 1, kind);
             return std::unexpected(Errors::UnexpectTokenKind);
         }
     private:
