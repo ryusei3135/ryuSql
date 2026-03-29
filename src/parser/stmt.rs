@@ -4,23 +4,40 @@ use crate::err::ErrorKinds;
 use crate::id;
 
 
-pub fn parse_stmt(
-    token_reader: &mut parse_utils::TokenReader
-) -> Result<(), ErrorKinds> {
-    match token_reader.current_kind::<true>() {
-        TokenKind::KeyWordCreate => {
-            token_reader.expect_kind::<{id!(TokenKind::KeyWordTable)}>()?;
-            let table_name = token_reader.expect_make_node::<
+
+fn define_column_node(
+    reader: & mut parse_utils::TokenReader
+) -> Result<ast::Node, ErrorKinds> {
+    Ok(
+        ast::Node::attach_node::<{id!(ast::NodeKind::ColumnNode)}>(
+        reader.expect_make_node::<
                 {id!(TokenKind::Name)},
-                {id!(ast::NodeKind::TableName)}>()?;
-            token_reader.expect_kind::< // "("を期待
-                {id!(TokenKind::SymbolLeftParen)}>()?;
+                {id!(ast::NodeKind::ColumnName)}>()?,
+        reader
+            .expect_make_node::<
+                {id!(TokenKind::Name)},
+                {id!(ast::NodeKind::ColumnType)}>()?
+            .skip_comma()?
+        )
+    )
+}
+
+pub fn parse_stmt(
+    reader: &mut parse_utils::TokenReader
+) -> Result<(), ErrorKinds> {
+    match reader.current_kind::<true>() {
+        TokenKind::KeyWordCreate => {
+            let table_name: ast::Node 
+                = reader
+                    .expect_kind::<{id!(TokenKind::KeyWordTable)}>()?
+                    .expect_make_node::<
+                        {id!(TokenKind::Name)},
+                        {id!(ast::NodeKind::TableName)}>()?
+                    .expect_kind::<{id!(TokenKind::SymbolLeftParen)}>(reader)?;
             loop {
-                let column_name = token_reader.expect_make_node::<
-                    {id!(TokenKind::Name)},
-                    {id!(ast::NodeKind::ColumnName)}>()?;
-                token_reader.expect_kind::<{id!(TokenKind::SymbolComma)}>()?;
-                if token_reader.check_kind::<{id!(TokenKind::SymbolRightParen)}>() {
+                let c = define_column_node(reader);
+                println!("{:?}", c);
+                if reader.check_kind::<{id!(TokenKind::SymbolRightParen)}>() {
                     break;
                 }
             }
