@@ -1,24 +1,37 @@
 
 
-#[macro_export]
-macro_rules! define_enum {
-    ($name:ident, $($variant:ident),*) => {
-        paste::paste! {
-            pub trait [<Is $name>] {
-                const VALUE: $name;
-            }
+pub type EnumIdType = u8;
 
+
+#[macro_export]
+macro_rules! define_kinds {
+    ($name:ident, $($variant:ident = $num:expr),*) => {
+        paste::paste! {
+            #[repr(u8)]
             #[derive(Debug, Clone, PartialEq, Copy, Eq)]
             pub enum $name {
-                $($variant),*
+                $($variant = $num),*
             }
-            $(
-                #[derive(Debug, Clone, PartialEq, Copy, Eq)]            
-                pub struct [<$variant Type>];
-                impl [<Is $name>] for [<$variant Type>] {
-                    const VALUE: $name = $name::$variant;
+
+            impl $name {
+                /// 数字を対応するバリアントに変換する
+                pub const fn from_u8<const NUM: crate::macros::EnumIdType>() -> Option<$name> {
+                    Some(
+                        match NUM {
+                            $($num => $name::$variant,)*
+                            _ => return None,
+                        }
+                    )
                 }
-            )*
+            }
         }
+    };
+}
+
+/// 列挙型のidを取得する
+#[macro_export]
+macro_rules! id{
+    ($variant:path) => {
+        $variant as EnumIdType
     };
 }

@@ -1,9 +1,9 @@
-use crate::lexer::kinds;
+use crate::lexer;
 
 pub struct Lexer {
-    last_char_kinds: Option<kinds::CharKinds>,
+    last_char_kinds: Option<lexer::CharKinds>,
     stack_chars: Option<String>,
-    pub tokens: Vec<kinds::Token>,
+    pub tokens: Vec<lexer::Token>,
 }
 // check_reserved_word
 impl Lexer {
@@ -11,19 +11,19 @@ impl Lexer {
         Self {
             last_char_kinds: None,
             stack_chars: None,
-            tokens: Vec::<kinds::Token>::new(),
+            tokens: Vec::<lexer::Token>::new(),
         }
     }
 
     pub fn tokenizer(&mut self, text: &str) {
         for chr in text.chars() {
-            let char_kinds: kinds::CharKinds = match chr {
-                'a'..='z' | 'A'..='Z' => kinds::CharKinds::Letter,
-                '0'..='9' => kinds::CharKinds::Digit,
-                ' ' | '\t' | '\n' => kinds::CharKinds::Space,
+            let char_kinds: lexer::CharKinds = match chr {
+                'a'..='z' | 'A'..='Z' => lexer::CharKinds::Letter,
+                '0'..='9' => lexer::CharKinds::Digit,
+                ' ' | '\t' | '\n' => lexer::CharKinds::Space,
                 '!'..='/' | ':'..='@' | '['..='`' | '{'..='~' =>
-                    kinds::CharKinds::Symbol,
-                _ => kinds::CharKinds::Other,
+                    lexer::CharKinds::Symbol,
+                _ => lexer::CharKinds::Other,
             };
             self.check_stackable(&char_kinds);
             self.stacking_chars(&char_kinds, &chr);
@@ -31,7 +31,7 @@ impl Lexer {
         self.push_token();
     }
 
-    fn check_stackable(&mut self, char_kinds: &kinds::CharKinds) {
+    fn check_stackable(&mut self, char_kinds: &lexer::CharKinds) {
         if self.last_char_kinds.is_some() {
             if char_kinds.clone() != self.last_char_kinds.unwrap() {
                 self.push_token();
@@ -42,7 +42,7 @@ impl Lexer {
 
     fn push_token(&mut self) {
         self.tokens.push(
-            kinds::Token::make(
+            lexer::Token::make(
                 &self.stack_chars.clone().unwrap(),
                 identify_token_kind(
                     &self.stack_chars.as_ref().unwrap(),
@@ -52,7 +52,7 @@ impl Lexer {
         );
     }
 
-    fn stacking_chars(&mut self, char_kinds: &kinds::CharKinds, chr: &char) {
+    fn stacking_chars(&mut self, char_kinds: &lexer::CharKinds, chr: &char) {
         if let Some(ref mut s) = self.stack_chars {
             s.push_str(&chr.clone().to_string());
         } else {
@@ -65,17 +65,17 @@ impl Lexer {
 
 fn identify_token_kind(
     stack_char: &str,
-    chr_kind: &kinds::CharKinds
-) -> kinds::TokenKind {
+    chr_kind: &lexer::CharKinds
+) -> lexer::TokenKind {
     return match (chr_kind, stack_char) {
-        (kinds::CharKinds::Digit, _) => kinds::TokenKind::Number,
-        (kinds::CharKinds::Letter, _) =>
+        (lexer::CharKinds::Digit, _) => lexer::TokenKind::Number,
+        (lexer::CharKinds::Letter, _) =>
             lookup_keyword(&stack_char)
-            .unwrap_or(kinds::TokenKind::Name),
-        (kinds::CharKinds::Symbol, _) =>
+            .unwrap_or(lexer::TokenKind::Name),
+        (lexer::CharKinds::Symbol, _) =>
             read_symbol(&stack_char)
-            .unwrap_or(kinds::TokenKind::Symbol),
-        (_, _) => kinds::TokenKind::NONE
+            .unwrap_or(lexer::TokenKind::Symbol),
+        (_, _) => lexer::TokenKind::Null
     };
 }
 
@@ -89,12 +89,12 @@ fn identify_token_kind(
 /// - 文字列がアルファベットでない場合もNone
 fn lookup_keyword(
     keyword: &str
-) -> Option<kinds::TokenKind> {
+) -> Option<lexer::TokenKind> {
     if keyword.chars().all(|c| c.is_ascii_alphabetic()) {
         return Some(
             match keyword.to_uppercase().as_str() {
-                "CREATE" => kinds::TokenKind::KeyWordCreate,
-                "TABLE" => kinds::TokenKind::KeyWordTable,
+                "CREATE" => lexer::TokenKind::KeyWordCreate,
+                "TABLE" => lexer::TokenKind::KeyWordTable,
                 _ => {
                     return None;
                 }
@@ -112,12 +112,12 @@ fn lookup_keyword(
 /// - 記号が登録されていない場合None
 fn read_symbol(
     symbol: &str
-) -> Option<kinds::TokenKind> {
+) -> Option<lexer::TokenKind> {
     return Some(
         match symbol {
-            "(" => kinds::TokenKind::SymbolLeftParen,
-            ")" => kinds::TokenKind::SymbolRightParen,
-            "," => kinds::TokenKind::SymbolComma,
+            "(" => lexer::TokenKind::SymbolLeftParen,
+            ")" => lexer::TokenKind::SymbolRightParen,
+            "," => lexer::TokenKind::SymbolComma,
             _ => return None,
         }
     );

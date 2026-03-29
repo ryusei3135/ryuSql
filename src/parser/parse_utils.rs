@@ -1,49 +1,70 @@
-use crate::lexer::kinds;
+use crate::lexer;
 use crate::err::ErrorKinds;
 use crate::parser::ast;
+use crate::macros::EnumIdType;
 
 
 pub struct TokenReader<'a> {
-    tokens: &'a Vec<kinds::Token>,
-    index: &'a usize
+    tokens: &'a Vec<lexer::Token>,
+    index: &'a mut usize
 }
 
 impl<'a> TokenReader<'a> {
-    pub fn new(tokens: &'a Vec<kinds::Token>, index: &'a usize) -> Self {
+    pub fn new(tokens: &'a lexer::Tokens, index: &'a mut usize) -> Self {
         Self {
             tokens,
             index
         }
     }
-
-    pub fn expect_kind<TOKEN>(
+    /// トークンの種類を比較し一致しなければエラーを返す
+    pub fn expect_kind<const T: EnumIdType>(
         &mut self,
     ) -> Result<(), ErrorKinds> {
-        if self.check_kind::<TOKEN>() && self.increment_index() {
+        if self.check_kind::<T>() && self.increment_index() {
             Ok(())
         } else {
             Err(ErrorKinds::UnexpectedTokenKind)
         }
     }
-
-    pub fn expect_make_node<TOKEN, NODE>(
+    /// トークンの種類を比較し一致すればノードを作成し返す
+    pub fn expect_make_node<const T: EnumIdType, const N: EnumIdType>(
         &mut self, 
-    ) -> Result<ast::Node, ErrorKinds>
-    where TOKEN: u8, NODE: u8 {
-        if self.check_kind::<TOKEN>() && self.increment_index() {
-            Ok(ast::Node::make<NODE>(value))
-        } else {
-            Err(ErrorKinds::UnexpectedTokenKind)
-        }
+    ) -> Result<ast::Node, ErrorKinds> {
+        self.expect_kind::<T>()?;
+        Ok(ast::Node::make::<N>(&self.tokens[*self.index].value))
+    }
+    #[inline(always)]
+    pub fn current_kind<const I: bool>(&mut self) -> lexer::TokenKind {
+        self.tokens[
+            if I {
+                *self.index += 1;
+                *self.index - 1
+            } else {
+                *self.index
+            }
+        ].kind
     }
 
-    #[inline(analy)]
-    fn check_kind<TOKEN>(&self) -> bool where TOKEN: u8 {
-        self.tokens[self.index].kind == kinds::TokenKind::from_kind::<TOKEN>()
+    pub fn not_token<const T: EnumIdType>(&self) -> bool {
+        self.tokens[*self.index].kind
+            != lexer::TokenKind::from_u8::<T>()
+                .unwrap()
+    }
+    /// トークンの種類を比較する
+    #[inline(always)]
+    pub fn check_kind<const T: EnumIdType>(&self) -> bool {
+        self.tokens[*self.index].kind
+            == lexer::TokenKind::from_u8::<T>()
+                .unwrap()
     }
 
-    #[inline(analy)]
+    #[inline(always)]
     fn increment_index(&mut self) -> bool {
-        (self.index += 1) != 0
+        if *self.index + 1 < self.tokens.len() {
+            *self.index += 1;
+            true
+        } else {
+            false
+        }
     }
 }

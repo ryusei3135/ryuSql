@@ -1,11 +1,13 @@
-use crate::parser::ast::NodeKind;
+use crate::define_kinds;
+use crate::macros::EnumIdType;
 
-pub enum NodeKind {
-    TableName(String),
-    ColumnNode(NodeKind::ColumnName, NodeKind::ColumnType),
-    ColumnName(String),
-    ColumnType(String)
-};
+define_kinds!(
+    NodeKind,
+    TableName = 0,
+    ColumnNode = 1,
+    ColumnName = 2,
+    ColumnType = 3
+);
 
 #[derive(Debug, Clone)]
 pub struct Node<'a> {
@@ -17,10 +19,10 @@ pub struct Node<'a> {
 
 
 impl<'a> Node<'a> {
-    pub fn make<K>(value: &String, node_kind: NodeKind) -> Node<'a> where K: IsNodeKind {
+    pub fn make<const N: EnumIdType>(value: &String) -> Node<'a> {
         Node {
             value: value.clone(),
-            kind: node_kind,
+            kind: NodeKind::from_u8::<N>().unwrap(),
             left: None,
             right: None,
         }

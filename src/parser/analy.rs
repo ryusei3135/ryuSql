@@ -1,8 +1,6 @@
-use crate::lexer::kinds;
+use crate::lexer;
 use crate::err::ErrorKinds;
-use crate::parser::ast;
-use crate::parser::check;
-use crate::parser::exprs;
+use crate::parser::*;
 
 
 pub struct Parser<'a> {
@@ -16,23 +14,12 @@ impl Parser<'_> {
         }
     }
     /// トークンの配列をastに変換
-    pub fn analysis(
-        &self,
-        tokens: &Vec<kinds::Token>
-    ) -> Result<Vec<ast::Node>, ErrorKinds> {
-        let mut pos: usize = 0;
-        let checker = exprs::ExprChecker::new(tokens);
-        let ast_node = Vec::<ast::Node>::new();
+    pub fn analysis(&self, tokens: &lexer::Tokens) -> Result<Vec<ast::Node>, ErrorKinds> {
+        let mut index: usize = 0;
+        let mut token_reader = 
+            parse_utils::TokenReader::new(tokens, &mut index);
 
-        for i in 0..tokens.len() {
-            ast_node.extend(
-                match tokens[i].kind {
-                    kinds::TokenKind::KeyWordCreate =>
-                        checker.create_table(&mut pos),
-                    _ => {},
-                }
-            );
-        }
+        let _ = stmt::parse_stmt(&mut token_reader);
 
         Ok(self.ast_node.clone())
     }

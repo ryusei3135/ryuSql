@@ -1,4 +1,4 @@
-use crate::define_enum;
+use crate::define_kinds;
 
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub(crate) enum CharKinds {
@@ -15,18 +15,20 @@ pub struct Token {
     pub kind: TokenKind,
 }
 
-define_enum!(
+define_kinds!(
     TokenKind,
-    Name,
-    Number,
-    Symbol,
-    NONE,
-    KeyWordCreate,
-    KeyWordTable,
-    SymbolLeftParen,
-    SymbolRightParen,
-    SymbolComma
+    Name = 0,
+    Number = 1,
+    Symbol = 2,
+    Null = 3,
+    KeyWordCreate = 4,
+    KeyWordTable = 5,
+    SymbolLeftParen = 6,
+    SymbolRightParen = 7,
+    SymbolComma = 8
 );
+
+pub type Tokens = Vec<Token>;
 
 impl Token {
     pub fn make(value: &String, kind: TokenKind) -> Self {
