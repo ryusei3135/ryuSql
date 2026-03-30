@@ -7,7 +7,8 @@ fn main() {
     let mut lexer: lexer::Lexer = lexer::Lexer::new();
     let parser = parser::Parser::new();
     lexer.tokenizer("create table name(n INT)");
-    let _ = parser.analysis(lexer.tokens.clone());
+    println!("{:?}", &lexer.tokens);
+    let _ = parser.analysis(lexer.tokens);
 }
 
 

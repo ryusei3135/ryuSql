@@ -17,7 +17,6 @@ fn define_column_node(
             .expect_make_node::<
                 {id!(TokenKind::Name)},
                 {id!(ast::NodeKind::ColumnType)}>()?
-            .skip_comma()?
         )
     )
 }
@@ -29,11 +28,13 @@ pub fn parse_stmt(
         TokenKind::KeyWordCreate => {
             let table_name: ast::Node 
                 = reader
-                    .expect_kind::<{id!(TokenKind::KeyWordTable)}>()?
+                    .expect_kind::<{
+                        id!(TokenKind::KeyWordTable)}>()?
                     .expect_make_node::<
                         {id!(TokenKind::Name)},
                         {id!(ast::NodeKind::TableName)}>()?
-                    .expect_kind::<{id!(TokenKind::SymbolLeftParen)}>(reader)?;
+                    .expect_kind::<{
+                        id!(TokenKind::SymbolLeftParen)}>(reader)?;
             loop {
                 let c = define_column_node(reader);
                 println!("{:?}", c);

@@ -39,11 +39,6 @@ impl<'a> TokenReader<'a> {
         Ok(self)
     }
 
-    pub fn skip_space(&mut self) -> Result<&mut self, ErrorKinds> {
-        self.expect_kind::<{id!(lexer::TokenKind::Space)}>()?;
-        Ok(self)
-    }
-
     #[inline(always)]
     pub fn current_kind<const I: bool>(&mut self) -> lexer::TokenKind {
         self.tokens[

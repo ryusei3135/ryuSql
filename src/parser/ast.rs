@@ -5,10 +5,11 @@ use crate::parser::parse_utils;
 
 define_kinds!(
     NodeKind,
-    TableName = 0,
-    ColumnNode = 1,
-    ColumnName = 2,
-    ColumnType = 3
+    StmtCrateTable,
+    TableName,
+    ColumnNode,
+    ColumnName,
+    ColumnType
 );
 
 #[derive(Debug, Clone)]

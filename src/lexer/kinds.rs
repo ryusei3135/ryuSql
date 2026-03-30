@@ -17,21 +17,22 @@ pub struct Token {
 
 define_kinds!(
     TokenKind,
-    Name = 0,
-    Number = 1,
-    Symbol = 2,
-    Null = 3,
-    KeyWordCreate = 4,
-    KeyWordTable = 5,
-    SymbolLeftParen = 6,
-    SymbolRightParen = 7,
-    SymbolComma = 8
+    Name,
+    Number,
+    Symbol,
+    Null,
+    Space,
+    KeyWordCreate,
+    KeyWordTable,
+    SymbolLeftParen,
+    SymbolRightParen,
+    SymbolComma
 );
 
 pub type Tokens = Vec<Token>;
 
 impl Token {
-    pub fn make(value: &String, kind: TokenKind) -> Self {
+    pub fn make_token(value: &Option<String>, kind: TokenKind) -> Self {
         Self {
             value: value.clone(),
             kind: kind,

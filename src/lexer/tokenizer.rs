@@ -30,10 +30,13 @@ impl Lexer {
         }
         self.push_token();
     }
-
+    /// トークンがスタック可能か調べる
+    /// スタック可能なら現在スタックされている文字列をトークンに変換する
+    /// スタックできないなら何もしない
+    #[inline(always)]
     fn check_stackable(&mut self, char_kinds: &lexer::CharKinds) {
-        if self.last_char_kinds.is_some() {
-            if char_kinds.clone() != self.last_char_kinds.unwrap() {
+        if let Some(last_chr_kind) = self.last_char_kinds {
+            if char_kinds.clone() != last_chr_kind {
                 self.push_token();
                 self.stack_chars = None;
             }
@@ -42,8 +45,8 @@ impl Lexer {
 
     fn push_token(&mut self) {
         self.tokens.push(
-            lexer::Token::make(
-                &self.stack_chars.clone().unwrap(),
+            lexer::Token::make_token(
+                &self.stack_chars,
                 identify_token_kind(
                     &self.stack_chars.as_ref().unwrap(),
                     &self.last_char_kinds.unwrap(), 
@@ -51,7 +54,7 @@ impl Lexer {
             )
         );
     }
-
+    /// 文字をスタックする
     fn stacking_chars(&mut self, char_kinds: &lexer::CharKinds, chr: &char) {
         if let Some(ref mut s) = self.stack_chars {
             s.push_str(&chr.clone().to_string());
